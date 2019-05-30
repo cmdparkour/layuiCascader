@@ -17,7 +17,7 @@
 
 2.回显功能只需一个参数即可
 
-![demo](E:\开源项目\layuiCascader\assets\demo.png)
+<img src="https://github.com/cmdparkour/layuiCascader/edit/master/assets\demo.png" width="365" height="619"/>
 
 ### 二、定义配置项options
 
