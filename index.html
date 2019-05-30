@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>级联演示</title>
+	<!-- 引入线上layui -->
+	<link href="./layui/css/layui.css" rel="stylesheet">
+	<script src="./layui/layui.all.js"></script>
+	<!-- 引入插件CSS样式 -->
+	<link rel="stylesheet" href="./mods/cascader/cascader.css">
+	<style>
+		.main{
+			margin: 20px;
+		}
+	</style>
+</head>
+<body>
+	<div class="main">
+		<cascader id="demo"></cascader>
+        <button class="layui-btn">提交</button>
+	</div>
+	<script>
+		layui.config({
+            base: './mods/cascader/'
+            ,version: '1.0'
+        });
+        layui.use(['jquery','cascader'],function(){
+            let $ = layui.jquery;
+        	let cascader = layui.cascader;
+        	let data = [
+                {
+                    value: '520000000000',
+                    label: 'a',
+                    hasChild:true,
+                    children: [
+
+                    ]
+                },
+                {
+                    value: 'A',
+                    label: 'a',
+                },
+                {
+                    value: 'A',
+                    label: 'a',
+                },
+                {
+                    value: 'A',
+                    label: 'a',
+                    hasChild:true
+                },
+                {
+                    value: 'A',
+                    label: 'a',
+                },
+                {
+                    value: 'A',
+                    label: 'a',
+                },
+                {
+                    value: 'x',
+                    label: '这是一个选择',
+                    children: [
+                        {
+                            value: 'AA2',
+                            label: 'aa2',
+                        },
+                        {
+                            value: 'BB2',
+                            label: 'bb2'
+                        }
+                    ]
+                }
+            ]
+            // data
+            // value
+            // 二选一，都写的话以data为主
+            let options={           	
+            	elem:'#demo'
+                // ,width:100                                                                       // 【可选】 input框宽度  【默认：220】  
+                // ,height:50                                                                       // 【可选】 input框高度  【默认：40】
+                ,prop:{
+                    value:'value',                                                                  // 【可选】 定义接口需要取得的值的名称字段  【默认：value】
+                    label:'label',                                                                  // 【可选】 定义接口显示的名称字段  【默认：label】
+                    children:'children'
+                }
+                ,showlast:false                                                                      // 【可选】 是否只显示最后一级 【默认：false】
+
+                ,data:[]                                                                            // 【二选一】初始化的值
+                ,value:0                                                                            // 【二选一】ajax请求初始值,即获取根结点的初始请求参数
+
+                ,getChildren:function(value){    // 【可选】 用户自定义获取data子集的方法,
+                    let data = [];                   //        value为当前dom的value值
+                    $.ajax({                         
+                        url:'https://open.gog.cn/appz/region/getRegion/'+value,
+                        type:'get',
+                        async:false,
+                        success:(res)=>{
+                            data = res.data;
+                            for(let i in data){
+                                data[i].value = data[i].id;
+                                data[i].label = data[i].name;
+                                delete data[i].id;
+                                delete data[i].name;
+                                data[i].hasChild = true;
+                            }
+                        }
+                    });
+                    return data;
+                }
+                ,checkData:['520000000000','520300000000','520302000000']  //回显参数               
+            }
+        	cascader.load(options);
+            // 提交按钮点击
+            $('.layui-btn').click(function(){
+                console.log(cascader.getChooseData());
+            })
+            // 监听点击事件
+            cascader.on('click',function(){
+                console.log(cascader.getChooseData())
+            })
+        });
+	</script>
+</body>
+</html>

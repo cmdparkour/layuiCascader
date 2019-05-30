@@ -1,0 +1,112 @@
+/* 所有CSS命名均采用中间连线形式 */
+.cascader-all{
+	position:relative;
+}
+.cascader-input{
+    border-radius: 4px;
+}
+.cascader-input:focus{
+    border-color: #409eff !important;
+}
+.cascader-input::-webkit-input-placeholder{
+	color: #c0c4cc;
+}
+.cascader-i{
+	position:absolute;
+	right:15px;
+	margin-top:-7px;
+	pointer-events: none;
+    transition: transform 0.2s;
+}
+.cascader-model{
+	position: absolute;
+	background-color: #fff;
+	border: 1px solid #e4e7ed;
+    border-radius: 2px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    z-index: 2000;
+    margin: 10px 0;
+    display: flex;
+}
+/* 三角形样式 */
+.cascader-model::before{
+	box-sizing: content-box;
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    top: -12px;
+    left:46px;
+    padding:0;
+    border-bottom:6px solid #FFFFFF;
+    border-top:6px solid transparent;
+    border-left:6px solid transparent;
+    border-right:6px solid transparent;
+    display: block;
+    content:'';
+    z-index: 12;
+}
+.cascader-model::after{
+	box-sizing: content-box;
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    top: -14px;
+    left:45px;
+    padding:0;
+    border-bottom:7px solid #cccccc;
+    border-top:7px solid transparent;
+    border-left:7px solid transparent;
+    border-right:7px solid transparent;
+    display: block;
+    content:'';
+    z-index:10
+}
+
+.cascader-model ul{
+	display: inline-block;
+	width: 160px;
+	height: 204px;
+    overflow-y: auto;
+    border-right: 1px solid #e4e7ed;
+    padding: 5px 0;
+}
+/* 滚动条样式设置 */
+.cascader-model ul::-webkit-scrollbar{
+	width: 5px;
+}
+.cascader-model ul::-webkit-scrollbar-thumb{
+ 	-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+ 	border-radius: 5px;
+    background: #c1c1c1;
+}
+.cascader-model ul::-webkit-scrollbar-track{
+	-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: #f1f1f1;
+    border-right: 1px solid #e4e7ed;
+}
+.cascader-model ul li{
+	font-size: 14px;
+    padding: 8px 20px;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #606266;
+    height: 34px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    cursor: pointer;
+    outline: none;
+    display: flex;
+    justify-content: space-between;
+}
+.cascader-model ul li.cascader-choose-active{
+	color: #409eff;
+}
+.cascader-model ul li:hover{
+	background-color: #f5f7fa;
+}
+.rotate{
+    transform-origin:center center;
+    transform: rotate(180deg);
+}
