@@ -1,8 +1,12 @@
 # layuiCascader
 @Name: 基于layui的ajax异步无限级联选择器
+
 @Author: 罗茜
+
 创建时间: 2019/05/23
+
 修改时间：2019/05/27 ----- 2019/05/28	----- 2019/05/29 ----- 2019/05/30
+
 使用说明: 在主文件里面使用layui.config设置，具体方法看index.html
 
 ## 使用说明
@@ -16,6 +20,17 @@
 1.已获取的数据不再重复获取
 
 2.回显功能只需一个参数即可
+
+```
+ ├─layui /layui 基础框架
+ │─mods //存放第三方组件的目录
+      └─cascader
+        ├─cascader.js //组件核心 JS 库
+        └─cascader.css //组件 CSS 库
+ |-index.html //演示demo
+```
+
+
 
 <img src="https://github.com/cmdparkour/layuiCascader/blob/master/assets/demo.png"/>
 
