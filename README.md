@@ -17,7 +17,7 @@
 
 2.回显功能只需一个参数即可
 
-<img src="https://github.com/cmdparkour/layuiCascader/edit/master/assets\demo.png" width="365" height="619"/>
+<img src="https://github.com/cmdparkour/layuiCascader/blob/master/assets/demo.png"/>
 
 ### 二、定义配置项options
 
