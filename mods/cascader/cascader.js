@@ -374,6 +374,10 @@
  				private.store.model.on('click','li',function(){
  					callback();
  				});
+ 			}else if(type == "hover"){
+ 				private.store.model.on('mouseenter','li',function(){
+ 					callback();
+ 				});
  			}
  		}
  	}
