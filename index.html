@@ -8,7 +8,7 @@
 	<link href="./layui/css/layui.css" rel="stylesheet">
 	<script src="./layui/layui.all.js"></script>
 	<!-- 引入插件CSS样式 -->
-	<link rel="stylesheet" href="./mods/cascader/cascader.css">
+	<link rel="stylesheet" href="./mods/ajaxCascader/ajaxCascader.css">
 	<style>
 		.main{
 			margin: 20px;
@@ -22,10 +22,10 @@
 	</div>
 	<script>
 		layui.config({
-            base: './mods/cascader/'
+            base: './mods/ajaxCascader/'
             ,version: '1.0'
         });
-        layui.use(['jquery','cascader'],function(){
+        layui.use(['jquery','ajaxCascader'],function(){
             let $ = layui.jquery;
         	let cascader = layui.cascader;
         	let data = [
