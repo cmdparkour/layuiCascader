@@ -18,6 +18,9 @@
 	pointer-events: none;
     transition: transform 0.2s;
 }
+.cascader-ul i{
+    padding-left: 15px;
+}
 .cascader-model{
 	position: absolute;
 	background-color: #fff;
@@ -64,7 +67,7 @@
 
 .cascader-model ul{
 	display: inline-block;
-	width: 160px;
+	min-width: 160px;
 	height: 204px;
     overflow-y: auto;
     border-right: 1px solid #e4e7ed;
