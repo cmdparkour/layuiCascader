@@ -36,8 +36,8 @@
                 // ,width:100                                                                       // 【可选】 input框宽度  【默认：220】  
                 // ,height:50                                                                       // 【可选】 input框高度  【默认：40】
                 ,prop:{
-                    value:'value',                                                                  // 【可选】 定义接口需要取得的值的名称字段  【默认：value】
-                    label:'label',                                                                  // 【可选】 定义接口显示的名称字段  【默认：label】
+                    value:'id',                                                                  // 【可选】 定义接口需要取得的值的名称字段  【默认：value】
+                    label:'regionName',                                                                  // 【可选】 定义接口显示的名称字段  【默认：label】
                     children:'children'
                 }
                 ,showlast:false                                                                      // 【可选】 是否只显示最后一级 【默认：false】
@@ -46,7 +46,7 @@
                 ,getChildren:function(value,callback){    // 【可选】 用户自定义获取data子集的方法,
                     var data = [];                   //        value为当前dom的value值
                     $.ajax({                         
-                        url:'https://open.gog.cn/appz/region/getRegion/'+value,
+                        url:'http://10.10.7.214:8101/sysRegion/getByParentId/'+value,
                         type:'get',
                         async:false,
                         success:function(res){

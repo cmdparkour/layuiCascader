@@ -1,6 +1,6 @@
 /**
  * @Name: 基于layui的异步无限级联选择器
- * @Author: 罗茜
+ * @Author: 前端喵
  * 创建时间: 2019/05/23
  * 修改时间：2019/05/27 ----- 2019/05/28
  * 使用说明: 在主文件里面使用layui.config设置，具体方法看index.html
@@ -46,6 +46,20 @@
  	Private.prototype.init = function(options){
  		let store = this.store;
  		let param = this.param;
+
+ 		// dom变量初始化
+ 		store.cascaderDom = $(options.elem); 		
+
+ 		// 渲染主dom
+ 		store.cascaderDom.after(`
+			<div class="cascader-all" style="width:`+this.param.width+`px;">
+				<input type="text" class="layui-input cascader-input" placeholder="请选择" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
+				<i class="layui-icon layui-icon-down cascader-i" style="top:`+this.param.height/2+`px;"></i>
+				<div class="cascader-model">
+				</div>
+			</div>
+ 		`);
+
  		// 把用户的参数值进行存储
  		for(let i in options){
  			if(options[i].length !== 0){
@@ -70,21 +84,10 @@
  			layer.msg('请配置有效的elem值 ')
  		}
  		if(store.data.length == 0){
- 			store.data = param.getChildren(param.value)
+ 			param.getChildren(param.value,(data)=>{
+ 				store.data = data;
+ 			})
  		}
- 		// dom变量初始化
- 		store.cascaderDom = $(options.elem);
- 		
-
- 		// 渲染主dom
- 		store.cascaderDom.after(`
-			<div class="cascader-all" style="width:`+this.param.width+`px;">
-				<input type="text" class="layui-input cascader-input" placeholder="请选择" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
-				<i class="layui-icon layui-icon-down cascader-i" style="top:`+this.param.height/2+`px;"></i>
-				<div class="cascader-model">
-				</div>
-			</div>
- 		`);
 
 		store.input = store.cascaderDom.nextAll().find('.cascader-input');
 		store.inputI = store.input.next();
@@ -120,9 +123,10 @@
  		}
  		if(data !== ""){
  			for(let i in data){
- 				let li = '<li '+param.prop.value+'="'+data[i][param.prop.value]+'" key="'+key+i+'"';
- 				if(i == choose){
+ 				let li = '<li value="'+data[i][param.prop.value]+'" key="'+key+i+'"';
+ 				if(i == choose || data[i][param.prop.value] == choose){
  					li = li +' class="cascader-choose-active"';
+ 					this.liPosition(i,data.length);
  				}
  				if(data[i].hasChild == true || data[i].children){
  					li = li+'>'+data[i][param.prop.label]+'<i class="layui-icon layui-icon-right"></i></li>';
@@ -139,7 +143,10 @@
 		ul.fadeIn('fast');
 		store.model.append(ul); 
  	}
+ 	// 当前选中的跳转位置
+ 	Private.prototype.liPosition = function(i,length){
 
+ 	}
  	// 鼠标hover监听事件[li标签]
  	Private.prototype.liHover = function(){
  		let store = this.store;
@@ -172,10 +179,13 @@
 					}
 					
 				}
-				if(!goodData || goodData.length == 0){
-					goodData = param.getChildren(value);
+				
+				if(!goodData){
+					param.getChildren(value,data=>{
+						goodData = data;
+					});
 					let children = data;
-					if(goodData){
+					if(goodData && goodData.length != 0){
 						for(let i in keys){
 							if(i == keys.length - 1){
 								children = goodData;
@@ -246,6 +256,7 @@
  	// 鼠标监听事件[input控件]
  	Private.prototype.inputClick = function(options){
  		let store = this.store;
+ 		let param = this.param;
  		let _this = this;
  		$(document).click(function(e){
  			let className = e.target.className;
@@ -263,11 +274,30 @@
  			store.model.slideUp(_this.param.time);
 	 		store.inputI.removeClass('rotate');
  		});
+ 		let time = 0;
  		store.input.click(function(){
  			store.showCascader = !store.showCascader;
  			if(store.showCascader == true){
- 				store.model.slideDown(_this.param.time);
-	 			store.inputI.addClass('rotate');
+ 				store.inputI.addClass('rotate');
+ 				// if(time != 0){
+ 				// 	let data = _this.store.data;
+	 			// 	let chooseData = _this.store.chooseData;
+	 			// 	let key = [];
+	 			// 	_this.clearModel();
+	 			// 	for(let i in chooseData){
+	 			// 		for(let x in data){
+	 			// 			if(data[x][param.prop.value] == chooseData[i]){
+	 			// 				_this.liHtml(data,key,x);
+	 			// 				key.unshift(x);
+	 			// 				data = data[x][param.prop.children]; 
+	 			// 				break;
+	 			// 			}
+	 			// 		}
+	 			// 	}
+	 				
+ 				// } 
+ 				// time ++;				
+ 				store.model.slideDown(_this.param.time); 				
  			}else{
  				store.model.slideUp(_this.param.time);
 	 			store.inputI.removeClass('rotate');
@@ -311,15 +341,21 @@
  		let chooseLabel=[];			//选中的项对应的label值
  		let keys=[];				//checkData在数据源中的位置大全
  		if(!store.data){
- 			backData[0] = param.getChildren(param.value);
+ 			param.getChildren(param.value,data=>{
+ 				backData[0] = data;
+ 			});
  		}else if(store.data.length == 0){
- 			backData[0] = param.getChildren(param.value);
+ 			param.getChildren(param.value,data=>{
+ 				backData[0] = data;
+ 			});
  		}else{
  			backData[0] = store.data;
  		}
  		for(let i=1;i<checkData.length;i++){
  			if(i < checkData.length){
- 				backData[i] = param.getChildren(checkData[i-1]);
+ 				param.getChildren(checkData[i-1],data=>{
+	 				backData[i] = data;
+	 			});
  			}
  		}
  		for(let i=checkData.length -1;i>=0;i--){
@@ -348,7 +384,6 @@
  			}
  			this.liHtml(backData[i],key,keys[i]);
  		}
-
  	}
  	// 清空ul标签
  	Private.prototype.clearModel = function(){
@@ -356,26 +391,43 @@
  		store.model.html('');
  	}
 
- 	let private = new Private();
-
+ 	let privates = new Array();
+	let dom_num = 0;
  	// 暴露给外界使用的方法
  	let cascader = {
  		// 页面初始化
  		load:function(options){
- 			private.init(options);
+ 			privates[dom_num] = new Array();
+ 			privates[dom_num].elem = options.elem;
+ 			privates[dom_num].obj = new Private();
+ 			privates[dom_num].obj.init(options);
+ 			dom_num ++;
+ 		},
+ 		// elem位置判断
+ 		elemCheck:function(elem){
+ 			if(!elem){
+ 				return privates[0].obj;
+ 			}
+ 			for(let i in privates){
+ 				if(privates[i].elem == elem){
+ 					return privates[i].obj;
+ 				}
+ 			}
  		},
  		// 获取页面中选中的数据，数组形式
- 		getChooseData:function(){
- 			return private.store.chooseData;
+ 		getChooseData:function(elem){
+ 			let obj = this.elemCheck(elem);
+ 			return obj.store.chooseData;
  		},
  		// 监听方法
- 		on:function(type,callback){
+ 		on:function(type,elem,callback){
+ 			let obj = this.elemCheck(elem);
  			if(type == "click"){
- 				private.store.model.on('click','li',function(){
+ 				obj.store.model.on('click','li',function(){
  					callback();
  				});
  			}else if(type == "hover"){
- 				private.store.model.on('mouseenter','li',function(){
+ 				obj.store.model.on('mouseenter','li',function(){
  					callback();
  				});
  			}
