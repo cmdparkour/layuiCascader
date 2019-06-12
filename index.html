@@ -35,13 +35,12 @@
         	cascader.load({
                 elem:'#demo1'                          
                 ,value:0  
-                // ,checkData:["520000000000", "520200000000", "520201000000"]
+                ,checkData:["520000000000", "520200000000", "520201000000"]
                 ,getChildren:function(value,callback){  
                     var data = [];                  
                     $.ajax({                         
                         url:'https://open.gog.cn/appz/region/getRegion/'+value,
                         type:'get',
-                        // async:false,
                         success:function(res){
                             data = res.data;
                             for(var i in data){
@@ -86,30 +85,31 @@
             // checkData:['100','200'] // 回显数据
 
             $('.layui-btn').click(function(){
-                cascader.load({
-                    elem:'#demo3'
-                    ,prop:{
-                        value:'id',
-                        label:'regionName',
-                        children:'children'
-                    }     
-                    ,width:400                  
-                    ,value:0                                                                       
-                    ,getChildren:function(value,callback){   
-                        var data = [];                  
-                        $.ajax({                         
-                            url:'http://10.10.7.214:8002/sysRegion/getByParentId/'+value,
-                            type:'get',
-                            success:function(res){
-                                data = res.data;
-                                for(let i in data){
-                                    data[i].hasChild = true;
-                                }
-                                callback(data);
-                            }
-                        });
-                    }      
-                });
+                // 作者本地测试使用
+                // cascader.load({
+                //     elem:'#demo3'
+                //     ,prop:{
+                //         value:'id',
+                //         label:'regionName',
+                //         children:'children'
+                //     }     
+                //     ,width:400                  
+                //     ,value:0                                                                       
+                //     ,getChildren:function(value,callback){   
+                //         var data = [];                  
+                //         $.ajax({                         
+                //             url:'http://10.10.7.214:8002/sysRegion/getByParentId/'+value,
+                //             type:'get',
+                //             success:function(res){
+                //                 data = res.data;
+                //                 for(let i in data){
+                //                     data[i].hasChild = true;
+                //                 }
+                //                 callback(data);
+                //             }
+                //         });
+                //     }      
+                // });
             })
 
             // 监听选中的事件
