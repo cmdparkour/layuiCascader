@@ -31,6 +31,7 @@
  		this.store = {
 	 		showCascader:false,
 	 		cascaderDom:null,					// 当前elem对象
+	 		cascaderAll:null,					// 生成的Dom主对象
 	 		input:null,							// input框dom
 	 		inputI:null,						// input框箭头dom
 	 		model:null,							// 下拉菜单的主dom
@@ -39,6 +40,7 @@
 	 		brother:null,						// li标签同级dom集合
 	 		data:[],							// 所有从后端异步请求的数据集合
 	 		chooseData:[],						// 已选中的数据集
+	 		zIndex:2000,						// 显示顺序
 	 	}
  	}
 
@@ -46,19 +48,8 @@
  	Private.prototype.init = function(options){
  		let store = this.store;
  		let param = this.param;
-
  		// dom变量初始化
  		store.cascaderDom = $(options.elem); 		
-
- 		// 渲染主dom
- 		store.cascaderDom.after(`
-			<div class="cascader-all" style="width:`+this.param.width+`px;">
-				<input type="text" class="layui-input cascader-input" placeholder="请选择" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
-				<i class="layui-icon layui-icon-down cascader-i" style="top:`+this.param.height/2+`px;"></i>
-				<div class="cascader-model">
-				</div>
-			</div>
- 		`);
 
  		// 把用户的参数值进行存储
  		for(let i in options){
@@ -72,21 +63,31 @@
  				}
  			}
  		}
+
  		delete param.data;
  		if(options.data){
  			store.data = options.data;
  		}
  		// 存储结束
+
+ 		if(store.cascaderDom.next().hasClass('cascader-all')){
+ 			store.cascaderDom.next().remove();
+ 		}
+ 		// 渲染主dom
+ 		store.cascaderDom.after(`
+			<div class="cascader-all" style="width:`+this.param.width+`px;">
+				<input type="text" class="layui-input cascader-input" placeholder="请选择" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
+				<i class="layui-icon layui-icon-down cascader-i" style="top:`+this.param.height/2+`px;"></i>
+				<div class="cascader-model" style="z-index:`+this.store.zIndex+`">
+				</div>
+			</div>
+ 		`);
+
  		// 判断elem是否存在以及是否正确，elem必填
  		if(!options.elem || options.elem == ""){
  			layer.msg('请配置有效的elem值 ')
  		}else if($(options.elem).length == 0){
  			layer.msg('请配置有效的elem值 ')
- 		}
- 		if(store.data.length == 0){
- 			param.getChildren(param.value,(data)=>{
- 				store.data = data;
- 			})
  		}
 
 		store.input = store.cascaderDom.nextAll().find('.cascader-input');
@@ -95,9 +96,14 @@
  		store.li = store.model.find('li');
  		// 全局状态初始化
  		store.model.hide();
- 		// li标签初始化
- 		this.liHtml(store.data);
-
+ 		if(store.data.length == 0){
+ 			param.getChildren(param.value,(data)=>{
+ 				store.data = data;
+ 				this.liHtml(store.data);
+ 			})
+ 		}else{
+ 			this.liHtml(store.data);
+ 		}
  		this.inputClick(options);
  		this.liClick();	
  		this.liHover();	
@@ -161,14 +167,11 @@
  				})
  			}else{
  				let keys=$(this).attr('key');
-
- 				let value = $(this).attr('value');
-				store.parentNextAll.remove();				
+ 				let value = $(this).attr('value');				
 				let data = _this.store.data;
 				let childrenName = _this.param.prop.children;
 				keys = keys.split('-');
 				let goodData = data;
-				let ulRender = true;
 
 				for(let i in keys){
 					let key = keys[i];
@@ -181,28 +184,32 @@
 				}
 				
 				if(!goodData){
-					param.getChildren(value,data=>{
-						goodData = data;
-					});
-					let children = data;
-					if(goodData && goodData.length != 0){
-						for(let i in keys){
-							if(i == keys.length - 1){
-								children = goodData;
-							}else{
-								children = children[i][childrenName];
+					param.getChildren(value,datax=>{
+						goodData = datax;
+						let children = data;
+						if(goodData && goodData.length != 0){
+							for(let i in keys){
+								if(i == keys.length - 1){
+									children = goodData;
+								}else{
+									if(!children[keys[i]][childrenName]){
+										children[keys[i]][childrenName] = new Array();
+									}
+									children = children[keys[i]][childrenName];
+								}
 							}
+							DataTreeAdd(data,goodData,keys);
+							store.parentNextAll = $(this).parent("ul").nextAll();
+							store.parentNextAll.remove();
+							_this.liHtml(goodData,keys);
+						}else{
+							$(this).find('i').remove();
+							store.parentNextAll.remove();
+							DataTreeChange(data,keys);
 						}
-						DataTreeAdd(data,goodData,keys);
-					}else{
-						$(this).find('i').remove();
-						store.parentNextAll.remove();
-						DataTreeChange(data,keys);
-						ulRender = false;
-					}
-					
-				}
-				if(ulRender == true){
+					});										
+				}else{
+					store.parentNextAll.remove();
 					_this.liHtml(goodData,keys);
 				}
 				// 增加data的树结点
@@ -250,6 +257,7 @@
  			_this.getChooseData();
  			store.showCascader = !store.showCascader;
  			store.model.slideUp(_this.param.time);
+ 			store.inputI.removeClass('rotate');
  		});
  	}
 
@@ -274,29 +282,26 @@
  			store.model.slideUp(_this.param.time);
 	 		store.inputI.removeClass('rotate');
  		});
- 		let time = 0;
  		store.input.click(function(){
  			store.showCascader = !store.showCascader;
  			if(store.showCascader == true){
- 				store.inputI.addClass('rotate');
- 				// if(time != 0){
- 				// 	let data = _this.store.data;
-	 			// 	let chooseData = _this.store.chooseData;
-	 			// 	let key = [];
-	 			// 	_this.clearModel();
-	 			// 	for(let i in chooseData){
-	 			// 		for(let x in data){
-	 			// 			if(data[x][param.prop.value] == chooseData[i]){
-	 			// 				_this.liHtml(data,key,x);
-	 			// 				key.unshift(x);
-	 			// 				data = data[x][param.prop.children]; 
-	 			// 				break;
-	 			// 			}
-	 			// 		}
-	 			// 	}
-	 				
- 				// } 
- 				// time ++;				
+ 				store.inputI.addClass('rotate'); 					
+	 				let chooseData = _this.store.chooseData;
+	 				if(chooseData.length != 0){
+						let data = _this.store.data;
+		 				let key = [];
+		 				_this.clearModel();
+		 				for(let i in chooseData){
+		 					for(let x in data){
+		 						if(data[x][param.prop.value] == chooseData[i]){
+		 							_this.liHtml(data,key,x);
+		 							key.unshift(x);
+		 							data = data[x][param.prop.children]; 
+		 							break;
+		 						}
+		 					}
+		 				}
+	 				}		
  				store.model.slideDown(_this.param.time); 				
  			}else{
  				store.model.slideUp(_this.param.time);
@@ -313,7 +318,7 @@
  		let chooseLabel = [];
  		for(let i in chooseDom){
  			if(chooseDom[i].innerText){
- 				chooseData.push($(chooseDom[i]).attr(this.param.prop.value));
+ 				chooseData.push($(chooseDom[i]).attr('value'));
  				chooseLabel.push(chooseDom[i].innerText);
  			}else{
  				break;
@@ -340,17 +345,7 @@
  		let backData = [];			//后端数据集合
  		let chooseLabel=[];			//选中的项对应的label值
  		let keys=[];				//checkData在数据源中的位置大全
- 		if(!store.data){
- 			param.getChildren(param.value,data=>{
- 				backData[0] = data;
- 			});
- 		}else if(store.data.length == 0){
- 			param.getChildren(param.value,data=>{
- 				backData[0] = data;
- 			});
- 		}else{
- 			backData[0] = store.data;
- 		}
+ 		backData[0] = store.data;
  		for(let i=1;i<checkData.length;i++){
  			if(i < checkData.length){
  				param.getChildren(checkData[i-1],data=>{
@@ -390,6 +385,11 @@
  		let store = this.store;
  		store.model.html('');
  	}
+ 	// 监听下拉菜单的位置
+	Private.prototype.handlePosition = function(){
+		// 当前屏幕大小
+		// let bodyWidth = 
+	}
 
  	let privates = new Array();
 	let dom_num = 0;
@@ -400,6 +400,7 @@
  			privates[dom_num] = new Array();
  			privates[dom_num].elem = options.elem;
  			privates[dom_num].obj = new Private();
+ 			privates[dom_num].obj.store.zIndex -= dom_num;
  			privates[dom_num].obj.init(options);
  			dom_num ++;
  		},

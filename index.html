@@ -17,7 +17,9 @@
 </head>
 <body>
 	<div class="main">
-		<cascader id="demo"></cascader>
+        <cascader id="demo1"></cascader>
+        <cascader id="demo2"></cascader>
+		<cascader id="demo3"></cascader>
         <button class="layui-btn">提交</button>
 	</div>
 	<script>
@@ -28,27 +30,18 @@
         layui.use(['jquery','ajaxCascader'],function(){
             var $ = layui.jquery;
         	var cascader = layui.ajaxCascader;
-            // data
-            // value
-            // 二选一，都写的话以data为主
-            var options={           	
-            	elem:'#demo'
-                // ,width:100                                                                       // 【可选】 input框宽度  【默认：220】  
-                // ,height:50                                                                       // 【可选】 input框高度  【默认：40】
-                ,prop:{
-                    value:'value',                                                                  // 【可选】 定义接口需要取得的值的名称字段  【默认：value】
-                    label:'label',                                                                  // 【可选】 定义接口显示的名称字段  【默认：label】
-                    children:'children'
-                }
-                ,showlast:false                                                                      // 【可选】 是否只显示最后一级 【默认：false】
-                ,value:0                                                                            // 【二选一】ajax请求初始值,即获取根结点的初始请求参数
 
-                ,getChildren:function(value,callback){    // 【可选】 用户自定义获取data子集的方法,
-                    var data = [];                   //        value为当前dom的value值
+            // Ajax传参模式
+        	cascader.load({
+                elem:'#demo1'                          
+                ,value:0  
+                // ,checkData:["520000000000", "520200000000", "520201000000"]
+                ,getChildren:function(value,callback){  
+                    var data = [];                  
                     $.ajax({                         
                         url:'https://open.gog.cn/appz/region/getRegion/'+value,
                         type:'get',
-                        async:false,
+                        // async:false,
                         success:function(res){
                             data = res.data;
                             for(var i in data){
@@ -61,18 +54,70 @@
                             callback(data);
                         }
                     });
-                }
-                // ,checkData:['520000000000','520300000000','520302000000']  //回显参数               
-            }
-        	cascader.load(options);
-            // 提交按钮点击
+                }      
+            });
+
+            // 直接赋值模式
+            cascader.load({
+                elem:'#demo2'                        
+                ,data:[
+                    {value:123,label:456,children:[
+                        {value:789,label:"子集"}
+                    ]},
+                    {value:240,label:"第一层"},
+                    {value:250,label:"第一层"},
+                    {value:260,label:"第一层"},
+                    {value:280,label:"第一层"},
+                ]
+            });
+
+            
+
+            // 其他可选参数
+            // width:250  //input框宽度
+            // height:50  //input框高度
+            // prop:{
+            //     value:"value",     // 选择器要获取的字段名称
+            //     label:"label",     // 显示时的名称
+            //     children:'children' // 子集的名称定义
+            // }
+            // time:250    // 下拉菜单显示出来的时间
+            // showlast:false  // 是否只显示选中的最后一级
+            // checkData:['100','200'] // 回显数据
+
             $('.layui-btn').click(function(){
-                console.log(cascader.getChooseData());
+                cascader.load({
+                    elem:'#demo3'
+                    ,prop:{
+                        value:'id',
+                        label:'regionName',
+                        children:'children'
+                    }     
+                    ,width:400                  
+                    ,value:0                                                                       
+                    ,getChildren:function(value,callback){   
+                        var data = [];                  
+                        $.ajax({                         
+                            url:'http://10.10.7.214:8002/sysRegion/getByParentId/'+value,
+                            type:'get',
+                            success:function(res){
+                                data = res.data;
+                                for(let i in data){
+                                    data[i].hasChild = true;
+                                }
+                                callback(data);
+                            }
+                        });
+                    }      
+                });
             })
-            // 监听点击事件
-            // cascader.on('click','#demo',function(){
-            //     console.log(cascader.getChooseData())
-            // })
+
+            // 监听选中的事件
+            cascader.on('click','#demo1',function(){
+
+                // 获取当前已选中的数据,可单独使用
+                console.log(cascader.getChooseData('#demo1'))
+            });
         });
 	</script>
 </body>
