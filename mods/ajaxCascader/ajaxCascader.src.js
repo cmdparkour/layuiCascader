@@ -127,6 +127,7 @@
  		let lis=[];
  		let param = this.param;
  		let store = this.store;
+ 		let position = [];
  		if(!key || key.length == 0){
  			key=""
  		}else{
@@ -138,7 +139,7 @@
  				let li = '<li value="'+data[i][param.prop.value]+'" key="'+key+i+'"';
  				if(i == choose || data[i][param.prop.value] == choose){
  					li = li +' class="cascader-choose-active"';
- 					this.liPosition(i,data.length);
+ 					position = [i,data.length];
  				}
  				if(data[i].hasChild == true || data[i].children){
  					li = li+'>'+data[i][param.prop.label]+'<i class="layui-icon layui-icon-right"></i></li>';
@@ -153,43 +154,46 @@
 			<ul class="cascader-ul">`+lis+`</ul>
 		`);
 		ul.fadeIn('fast');
-		store.model.append(ul); 
+		store.model.append(ul);
+		this.liPosition(position);
+		this.ModelPosition();
  	}
  	// 当前选中的跳转位置
- 	Private.prototype.liPosition = function(i,length){
- 		
+ 	Private.prototype.liPosition = function(position){
+ 		// console.log(i)
+ 		// console.log(length)
+ 		// console.log('-------------')
+ 		let model = this.store.model.find('ul').last();
+ 		console.log(model)
+ 		// let liHeight = 
  	}
  	Private.prototype.modelHandle = function(){
  		$(window).resize(()=>{          //当浏览器大小变化时
-		    // console.log($(window).width()); 
 		    let model = this.store.model;
 		    this.ModelPosition();
 		});
  	}
  	let modelWidth = 0;
  	Private.prototype.ModelPosition = function(){
- 		// let model = this.store.model;
- 		// let input = this.store.input;
- 		// let BodyWidth = document.documentElement.clientWidth;
- 		// let positionLeft = 0
- 		// 	left = 0;
- 		// if(window.getComputedStyle(model[0]).width !== "auto"){
- 		// 	modelWidth = window.getComputedStyle(model[0]).width.replace('px','');
- 		// }
- 		// left = input.offset().left - model.position().left;
- 		// console.log(left)
- 		// if(BodyWidth < modelWidth){
- 		// 	positionLeft =
- 		// }else{
- 		// 	right = BodyWidth - modelWidth;
- 		// }
- 		// if(right < 0){
- 		// 	model.css("left",right-10);
- 		// }else if(right == 10){
-
- 		// }else{
- 		// 	// model.css("left",0);
- 		// }
+ 		let model = this.store.model;
+ 		let input = this.store.input;
+ 		let BodyWidth = document.documentElement.clientWidth;
+ 		let positionLeft = 0
+ 			left = 0;
+ 		if(window.getComputedStyle(model[0]).width !== "auto"){
+ 			modelWidth = window.getComputedStyle(model[0]).width.replace('px','');
+ 		}
+ 		left = input.offset().left - model.position().left;
+ 		if(BodyWidth < modelWidth){
+ 			positionLeft = BodyWidth - modelWidth;
+ 		}else{
+ 			// right = BodyWidth - modelWidth;
+ 		}
+ 		if(positionLeft < 0){
+ 			model.css("left",positionLeft - 30);
+ 		}else{
+ 			model.css('left',0);
+ 		}
  	}
  	// 鼠标hover监听事件[li标签]
  	Private.prototype.liHover = function(){
@@ -376,6 +380,15 @@
  			label = label.join('/');
  		}
  		store.input.val(label);
+ 		let fontWidth = store.input.css('font-size').replace('px',''),
+ 			inputWidth = store.input.width(),
+ 			labelWidth = label.length;
+ 		let maxLabelWidth = Math.floor(inputWidth/fontWidth);
+ 		if(labelWidth>maxLabelWidth){
+ 			store.input.attr('title',label);
+ 		}else{
+ 			store.input.attr('title',"");
+ 		} 		
  	}
  	// 数据回显
  	Private.prototype.dataToshow = function(checkData){
