@@ -36,6 +36,7 @@
                 elem:'#demo1'                          
                 ,value:0  
                 ,checkData:["520000000000", "520200000000", "520201000000"]
+                ,placeholder:'请选择您的方案'
                 ,getChildren:function(value,callback){  
                     var data = [];                  
                     $.ajax({                         
@@ -80,6 +81,7 @@
             //     label:"label",     // 显示时的名称
             //     children:'children' // 子集的名称定义
             // }
+            // placeholder // input框提示词
             // time:250    // 下拉菜单显示出来的时间
             // showlast:false  // 是否只显示选中的最后一级
             // checkData:['100','200'] // 回显数据
@@ -114,7 +116,6 @@
 
             // 监听选中的事件
             cascader.on('click','#demo1',function(){
-
                 // 获取当前已选中的数据,可单独使用
                 console.log(cascader.getChooseData('#demo1'))
             });

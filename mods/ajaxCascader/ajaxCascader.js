@@ -27,7 +27,8 @@ layui.define(["jquery"], function (exports) {
         label: "label",
         children: 'children'
       },
-      time: 250
+      time: 250,
+      placeholder: "请选择"
     },
     // 定义全局状态仓库
     this.store = {
@@ -77,7 +78,7 @@ layui.define(["jquery"], function (exports) {
       store.cascaderDom.next().remove();
     }
     // 渲染主dom
-    store.cascaderDom.after("\n\t\t\t<div class=\"cascader-all\" style=\"width:" + this.param.width + "px;\">\n\t\t\t\t<input type=\"text\" class=\"layui-input cascader-input\" placeholder=\"请选择\" readonly style=\"width:" + this.param.width + "px;height:" + this.param.height + "px;\">\n\t\t\t\t<i class=\"layui-icon layui-icon-down cascader-i\" style=\"top:" + this.param.height / 2 + "px;\"></i>\n\t\t\t\t<div class=\"cascader-model\" style=\"z-index:" + this.store.zIndex + "\">\n\t\t\t\t</div>\n\t\t\t</div>\n \t\t");
+    store.cascaderDom.after("\n\t\t\t<div class=\"cascader-all\" style=\"width:" + this.param.width + "px;\">\n\t\t\t\t<input type=\"text\" class=\"layui-input cascader-input\" placeholder=\"" + param.placeholder + "\" readonly style=\"width:" + this.param.width + "px;height:" + this.param.height + "px;\">\n\t\t\t\t<i class=\"layui-icon layui-icon-down cascader-i\" style=\"top:" + this.param.height / 2 + "px;\"></i>\n\t\t\t\t<div class=\"cascader-model\" style=\"z-index:" + this.store.zIndex + "\">\n\t\t\t\t</div>\n\t\t\t</div>\n \t\t");
 
     // 判断elem是否存在以及是否正确，elem必填
     if (!options.elem || options.elem == "") {
@@ -113,6 +114,7 @@ layui.define(["jquery"], function (exports) {
     this.inputClick(options);
     this.liClick();
     this.liHover();
+    this.modelHandle();
   };
 
   // li标签赋值方法
@@ -149,13 +151,48 @@ layui.define(["jquery"], function (exports) {
   };
   // 当前选中的跳转位置
   Private.prototype.liPosition = function (i, length) {};
+  Private.prototype.modelHandle = function () {
+    var _this3 = this;
+
+    $(window).resize(function () {
+      //当浏览器大小变化时
+      // console.log($(window).width()); 
+      var model = _this3.store.model;
+      _this3.ModelPosition();
+    });
+  };
+  var modelWidth = 0;
+  Private.prototype.ModelPosition = function () {}
+  // let model = this.store.model;
+  // let input = this.store.input;
+  // let BodyWidth = document.documentElement.clientWidth;
+  // let positionLeft = 0
+  //  left = 0;
+  // if(window.getComputedStyle(model[0]).width !== "auto"){
+  //  modelWidth = window.getComputedStyle(model[0]).width.replace('px','');
+  // }
+  // left = input.offset().left - model.position().left;
+  // console.log(left)
+  // if(BodyWidth < modelWidth){
+  //  positionLeft =
+  // }else{
+  //  right = BodyWidth - modelWidth;
+  // }
+  // if(right < 0){
+  //  model.css("left",right-10);
+  // }else if(right == 10){
+
+  // }else{
+  //  // model.css("left",0);
+  // }
+
   // 鼠标hover监听事件[li标签]
-  Private.prototype.liHover = function () {
+  ;Private.prototype.liHover = function () {
     var store = this.store;
     var param = this.param;
     var _this = this;
     store.model.on('mouseenter', 'li', function () {
-      var _this3 = this;
+      var _this4 = this;
 
       store.parentNextAll = $(this).parent("ul").nextAll();
       store.brother = $(this).siblings();
@@ -190,8 +227,8 @@ layui.define(["jquery"], function (exports) {
             array.hasChild = false;
           };
 
-          var keys = $(_this3).attr('key');
-          var value = $(_this3).attr('value');
+          var keys = $(_this4).attr('key');
+          var value = $(_this4).attr('value');
           var data = _this.store.data;
           var childrenName = _this.param.prop.children;
           keys = keys.split('-');
@@ -222,11 +259,11 @@ layui.define(["jquery"], function (exports) {
                   }
                 }
                 DataTreeAdd(data, goodData, keys);
-                store.parentNextAll = $(_this3).parent("ul").nextAll();
+                store.parentNextAll = $(_this4).parent("ul").nextAll();
                 store.parentNextAll.remove();
                 _this.liHtml(goodData, keys);
               } else {
-                $(_this3).find('i').remove();
+                $(_this4).find('i').remove();
                 store.parentNextAll.remove();
                 DataTreeChange(data, keys);
               }
@@ -302,6 +339,7 @@ layui.define(["jquery"], function (exports) {
           }
         }
         store.model.slideDown(_this.param.time);
+        _this.ModelPosition();
       } else {
         store.model.slideUp(_this.param.time);
         store.inputI.removeClass('rotate');
@@ -338,7 +376,7 @@ layui.define(["jquery"], function (exports) {
   };
   // 数据回显
   Private.prototype.dataToshow = function (checkData) {
-    var _this4 = this;
+    var _this5 = this;
 
     var param = this.param;
     var store = this.store;
@@ -346,59 +384,46 @@ layui.define(["jquery"], function (exports) {
     var chooseLabel = []; //选中的项对应的label值
     var keys = []; //checkData在数据源中的位置大全
     backData[0] = store.data;
+    var flag = 1;
 
-    // for(let i=1;i<checkData.length;i++){
-    //  if(i < checkData.length){
-    //    param.getChildren(checkData[i-1],data=>{
-    //      backData[i] = data;
-    //    });
-    //  }
-    // }
-    var getBackData = new Promise(function (resolve, reject) {
-      var _loop = function _loop(_i2) {
-        if (_i2 < checkData.length) {
-          param.getChildren(checkData[_i2 - 1], function (data) {
-            backData[_i2] = data;
-            if (_i2 = checkData.length - 1) {
-              resolve(0);
-            }
-          });
-        }
-        i = _i2;
-      };
-
-      for (var i = 1; i < checkData.length; i++) {
-        _loop(i);
-      }
-    });
-    Promise.all([getBackData]).then(function () {
-      setTimeout(function () {
-        for (var i = checkData.length - 1; i >= 0; i--) {
-          for (var x in backData[i]) {
-            if (checkData[i] == backData[i][x][param.prop.value]) {
-              keys.unshift(x);
-              chooseLabel.unshift(backData[i][x][param.prop.label]);
-              if (i < checkData.length - 1) {
-                backData[i][x][param.prop.children] = backData[i + 1];
+    var _loop = function _loop(i) {
+      if (i < checkData.length) {
+        param.getChildren(checkData[i - 1], function (data) {
+          backData[i] = data;
+          flag++;
+          if (flag == checkData.length) {
+            for (var _i2 = checkData.length - 1; _i2 >= 0; _i2--) {
+              for (var x in backData[_i2]) {
+                if (checkData[_i2] == backData[_i2][x][param.prop.value]) {
+                  keys.unshift(x);
+                  chooseLabel.unshift(backData[_i2][x][param.prop.label]);
+                  if (_i2 < checkData.length - 1) {
+                    backData[_i2][x][param.prop.children] = backData[_i2 + 1];
+                  }
+                }
               }
             }
-          }
-        }
-        store.data = backData[0];
+            store.data = backData[0];
 
-        // input框数据回显
-        _this4.inputValueChange(chooseLabel);
-        _this4.clearModel();
-        // 选择器数据回显
-        var key = [];
-        for (var _i3 in backData) {
-          if (_i3 !== "0") {
-            key.push(keys[_i3 - 1]);
+            // input框数据回显
+            _this5.inputValueChange(chooseLabel);
+            _this5.clearModel();
+            // 选择器数据回显
+            var key = [];
+            for (var _i3 in backData) {
+              if (_i3 !== "0") {
+                key.push(keys[_i3 - 1]);
+              }
+              _this5.liHtml(backData[_i3], key, keys[_i3]);
+            }
           }
-          _this4.liHtml(backData[_i3], key, keys[_i3]);
-        }
-      }, 80);
-    });
+        });
+      }
+    };
+
+    for (var i = 1; i < checkData.length; i++) {
+      _loop(i);
+    }
   };
   // 清空ul标签
   Private.prototype.clearModel = function () {

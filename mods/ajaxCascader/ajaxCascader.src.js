@@ -25,7 +25,8 @@
  				label:"label",
  				children:'children'
  			},
- 			time:250
+ 			time:250,
+ 			placeholder:"请选择"
  		},
  		// 定义全局状态仓库
  		this.store = {
@@ -76,7 +77,7 @@
  		// 渲染主dom
  		store.cascaderDom.after(`
 			<div class="cascader-all" style="width:`+this.param.width+`px;">
-				<input type="text" class="layui-input cascader-input" placeholder="请选择" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
+				<input type="text" class="layui-input cascader-input" placeholder="`+param.placeholder+`" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
 				<i class="layui-icon layui-icon-down cascader-i" style="top:`+this.param.height/2+`px;"></i>
 				<div class="cascader-model" style="z-index:`+this.store.zIndex+`">
 				</div>
@@ -117,8 +118,7 @@
  		this.inputClick(options);
  		this.liClick();	
  		this.liHover();	
-
-	 			
+ 		this.modelHandle();	 			
  	}
 
  	// li标签赋值方法
@@ -157,7 +157,39 @@
  	}
  	// 当前选中的跳转位置
  	Private.prototype.liPosition = function(i,length){
+ 		
+ 	}
+ 	Private.prototype.modelHandle = function(){
+ 		$(window).resize(()=>{          //当浏览器大小变化时
+		    // console.log($(window).width()); 
+		    let model = this.store.model;
+		    this.ModelPosition();
+		});
+ 	}
+ 	let modelWidth = 0;
+ 	Private.prototype.ModelPosition = function(){
+ 		// let model = this.store.model;
+ 		// let input = this.store.input;
+ 		// let BodyWidth = document.documentElement.clientWidth;
+ 		// let positionLeft = 0
+ 		// 	left = 0;
+ 		// if(window.getComputedStyle(model[0]).width !== "auto"){
+ 		// 	modelWidth = window.getComputedStyle(model[0]).width.replace('px','');
+ 		// }
+ 		// left = input.offset().left - model.position().left;
+ 		// console.log(left)
+ 		// if(BodyWidth < modelWidth){
+ 		// 	positionLeft =
+ 		// }else{
+ 		// 	right = BodyWidth - modelWidth;
+ 		// }
+ 		// if(right < 0){
+ 		// 	model.css("left",right-10);
+ 		// }else if(right == 10){
 
+ 		// }else{
+ 		// 	// model.css("left",0);
+ 		// }
  	}
  	// 鼠标hover监听事件[li标签]
  	Private.prototype.liHover = function(){
@@ -308,7 +340,8 @@
 		 					}
 		 				}
 	 				}		
- 				store.model.slideDown(_this.param.time); 				
+ 				store.model.slideDown(_this.param.time);	
+ 				_this.ModelPosition();			
  			}else{
  				store.model.slideUp(_this.param.time);
 	 			store.inputI.removeClass('rotate');
@@ -352,59 +385,42 @@
  		let chooseLabel=[];			//选中的项对应的label值
  		let keys=[];				//checkData在数据源中的位置大全
  		backData[0] = store.data;
+ 		let flag = 1;
+ 		for(let i=1;i<checkData.length;i++){
+ 			if(i < checkData.length){
+ 				param.getChildren(checkData[i-1],data=>{
+	 				backData[i] = data;
+	 				flag++;
+	 				if(flag == checkData.length){
+	 					for(let i=checkData.length -1;i>=0;i--){
+				 			for(let x in backData[i]){
+				 				if(checkData[i] == backData[i][x][param.prop.value]){
+					 				keys.unshift(x);
+					 				chooseLabel.unshift(backData[i][x][param.prop.label])
+					 				if(i < checkData.length -1){
+					 					backData[i][x][param.prop.children] = backData[i+1];
+					 				}
+					 				
+					 			}
+				 			}	 			
+				 		}
+				 		store.data = backData[0];
 
- 		// for(let i=1;i<checkData.length;i++){
- 		// 	if(i < checkData.length){
- 		// 		param.getChildren(checkData[i-1],data=>{
-	 	// 			backData[i] = data;
-	 	// 		});
- 		// 	}
- 		// }
- 		let getBackData = new Promise((resolve, reject)=>{
- 			for(let i=1;i<checkData.length;i++){
-	 			if(i < checkData.length){
-	 				param.getChildren(checkData[i-1],data=>{
-		 				backData[i] = data;
-		 				if(i = checkData.length - 1){
-		 					resolve(0);
-		 				}
-		 			});
-	 			}
-	 		}	 		
- 		});
- 		Promise.all([getBackData])
- 		.then(()=>{
- 			setTimeout(()=>{
- 				for(let i=checkData.length -1;i>=0;i--){
-		 			for(let x in backData[i]){
-		 				if(checkData[i] == backData[i][x][param.prop.value]){
-			 				keys.unshift(x);
-			 				chooseLabel.unshift(backData[i][x][param.prop.label])
-			 				if(i < checkData.length -1){
-			 					backData[i][x][param.prop.children] = backData[i+1];
-			 				}
-			 				
-			 			}
-		 			}
-		 			
-		 		}
-		 		store.data = backData[0];
-
-		 		// input框数据回显
-		 		this.inputValueChange(chooseLabel);
-		 		this.clearModel();
-		 		// 选择器数据回显
-		 		let key = [];
-		 		for(let i in backData){
-		 			if(i !== "0"){
-		 				key.push(keys[i-1]);
-		 			}
-		 			this.liHtml(backData[i],key,keys[i]);
-		 		}
- 			},80); 						
- 		})
-
- 		
+				 		// input框数据回显
+				 		this.inputValueChange(chooseLabel);
+				 		this.clearModel();
+				 		// 选择器数据回显
+				 		let key = [];
+				 		for(let i in backData){
+				 			if(i !== "0"){
+				 				key.push(keys[i-1]);
+				 			}
+				 			this.liHtml(backData[i],key,keys[i]);
+				 		}	
+	 				}
+	 			});
+ 			}
+ 		}		
  	}
  	// 清空ul标签
  	Private.prototype.clearModel = function(){
