@@ -14,6 +14,7 @@
 ### 一、Demo
 
 [查看demo](http://blog.51weblove.com/demo/layuiAjaxCascader/index.html)
+[更新日志](https://fly.layui.com/extend/ajaxCascader/)
 
 此插件主要用来实现数据异步加载功能，具体使用方法，请参照index.html
 
@@ -31,9 +32,10 @@
  ├─layui /layui 基础框架
  │─mods //存放第三方组件的目录
       └─cascader
-        ├─cascader.js //组件核心 JS 库
+        ├─cascader.js //组件核心 JS 库【转换为es5】
+        ├─cascader.src.js //开发时使用的js文件
         └─cascader.css //组件 CSS 库
- |-index.html //演示demo
+ |-index.html //演示demo【包含最简调用模式】
 ```
 
 
@@ -47,6 +49,7 @@ let options={
     elem:'#demo'                              //【必填】dom对应的id值或class值，最好为id
     ,width:100                                //【可选】input框宽度  【默认：220】  
     ,height:50                                //【可选】input框高度  【默认：40】
+    ,placeholder:"请选择您的最佳伴侣"		  //【可选】input框placeholder值 【默认：请选择】
     ,prop:{
          value:'value',                       //【可选】定义接口需要取得的值的名称字段【默认:value】
          label:'label',                       //【可选】定义接口显示的名称字段  【默认：label】
@@ -104,6 +107,50 @@ cascader.on('click',function(){
 // 选择器hover事件的监听
 cascader.on('hover',function(){
 	
+});
+```
+
+## 五、最简调用模式
+
+```
+// 直接赋值模式
+cascader.load({
+	elem:'#demo2'                        
+	,data:[
+		{value:123,label:456,children:[
+			{value:789,label:"子集"}
+		]},
+		{value:240,label:"第一层"},
+		{value:250,label:"第一层"},
+		{value:260,label:"第一层"},
+		{value:280,label:"第一层"},
+	]
+});
+```
+
+```
+// Ajax传参模式
+cascader.load({
+	elem:'#demo1'                          
+	,value:0  
+	,getChildren:function(value,callback){  
+		var data = [];                  
+		$.ajax({                         
+			url:'https://open.gog.cn/appz/region/getRegion/'+value,
+			type:'get',
+			success:function(res){
+				data = res.data;
+				for(var i in data){
+					data[i].value = data[i].id;
+					data[i].label = data[i].name;
+					delete data[i].id;
+					delete data[i].name;
+					data[i].hasChild = true;
+				}
+				callback(data);
+			}
+		});
+	}      
 });
 ```
 
