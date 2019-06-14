@@ -14,6 +14,7 @@
 ### 一、Demo
 
 [查看demo](http://blog.51weblove.com/demo/layuiAjaxCascader/index.html)
+
 [更新日志](https://fly.layui.com/extend/ajaxCascader/)
 
 此插件主要用来实现数据异步加载功能，具体使用方法，请参照index.html
