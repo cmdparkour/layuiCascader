@@ -1,4 +1,7 @@
 /* 所有CSS命名均采用中间连线形式 */
+html #layuicss-ajaxCascader{
+
+}
 .cascader-all{
     position: relative;
 }
@@ -29,7 +32,6 @@
     border-radius: 2px;
     box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
     margin: 10px 0;
-    display: flex;
     transition:left 0.2s;
 }
 /* 三角形样式 */

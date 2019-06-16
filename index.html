@@ -7,8 +7,7 @@
 	<!-- 引入线上layui -->
 	<link href="./layui/css/layui.css" rel="stylesheet">
 	<script src="./layui/layui.all.js"></script>
-	<!-- 引入插件CSS样式 -->
-	<link rel="stylesheet" href="./mods/ajaxCascader/ajaxCascader.css">
+
 	<style>
 		.main{
 			margin: 20px;
@@ -25,7 +24,7 @@
 	<script>
 		layui.config({
             base: './mods/ajaxCascader/'
-            ,version: '1.0'
+            ,version: '1.3'
         });
         layui.use(['jquery','ajaxCascader'],function(){
             var $ = layui.jquery;
@@ -35,8 +34,6 @@
         	cascader.load({
                 elem:'#demo1'                          
                 ,value:0  
-                ,checkData:["520000000000", "522600000000", "522601000000"]
-                ,placeholder:'请选择您的方案'
                 ,getChildren:function(value,callback){  
                     var data = [];                  
                     $.ajax({                         
@@ -59,7 +56,7 @@
 
             // 直接赋值模式
             cascader.load({
-                elem:'#demo2'                        
+                elem:'#demo2'                     
                 ,data:[
                     {value:123,label:456,children:[
                         {value:789,label:"子集"}
@@ -87,31 +84,7 @@
             // checkData:['100','200'] // 回显数据
 
             $('.layui-btn').click(function(){
-                // 作者本地测试使用
-                // cascader.load({
-                //     elem:'#demo3'
-                //     ,prop:{
-                //         value:'id',
-                //         label:'regionName',
-                //         children:'children'
-                //     }     
-                //     ,width:400                  
-                //     ,value:0                                                                       
-                //     ,getChildren:function(value,callback){   
-                //         var data = [];                  
-                //         $.ajax({                         
-                //             url:'http://10.10.7.214:8002/sysRegion/getByParentId/'+value,
-                //             type:'get',
-                //             success:function(res){
-                //                 data = res.data;
-                //                 for(let i in data){
-                //                     data[i].hasChild = true;
-                //                 }
-                //                 callback(data);
-                //             }
-                //         });
-                //     }      
-                // });
+                
             })
 
             // 监听选中的事件
