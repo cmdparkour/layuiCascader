@@ -41,10 +41,6 @@
  |-index.html //演示demo【包含最简调用模式】
 ```
 
-
-
-<img src="https://github.com/cmdparkour/layuiCascader/blob/master/assets/demo.png"/>
-
 ### 二、定义配置项options
 
 ```
