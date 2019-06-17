@@ -55,7 +55,7 @@ let options={
          children:'children'                  //【可选】定义接口子集的名称字段 【默认：children】
     }
     ,showlast:false                           //【可选】是否只显示最后一级 【默认：false】
-    
+    ,clicklast:false			      //【可选】点击最后一级才选择数据
     ,data:[]                                  //【二选一】初始化的值
     ,value:0                                  //【二选一】ajax请求初始值,即获取根结点的初始请求参数
 
