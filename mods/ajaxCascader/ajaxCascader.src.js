@@ -137,7 +137,7 @@
  		if(data !== ""){
  			for(let i in data){
  				let li = '<li value="'+data[i][param.prop.value]+'" key="'+key+i+'"';
- 				if(i == choose || data[i][param.prop.value] == choose){
+ 				if(i == choose){
  					li = li +' class="cascader-choose-active"';
  					position = [i,data.length];
  				}
