@@ -486,17 +486,6 @@
  			privates[dom_num].obj.init(options);
  			dom_num ++;
  		},
- 		// elem位置判断
- 		elemCheck:function(elem){
- 			if(!elem){
- 				return privates[0].obj;
- 			}
- 			for(let i in privates){
- 				if(privates[i].elem == elem){
- 					return privates[i].obj;
- 				}
- 			}
- 		},
  		// 获取页面中选中的数据，数组形式
  		getChooseData:function(elem){
  			let obj = this.elemCheck(elem);
@@ -513,6 +502,17 @@
  				obj.store.model.on('mouseenter','li',function(){
  					callback();
  				});
+ 			}
+ 		}
+ 		// elem位置判断，禁止外界调用，因为你调也没啥卵用
+ 		elemCheck:function(elem){
+ 			if(!elem){
+ 				return privates[0].obj;
+ 			}
+ 			for(let i in privates){
+ 				if(privates[i].elem == elem){
+ 					return privates[i].obj;
+ 				}
  			}
  		}
  	}
