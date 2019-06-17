@@ -304,12 +304,33 @@
 		 			store.showCascader = !store.showCascader;
 		 			store.model.slideUp(_this.param.time);
 		 			store.inputI.removeClass('rotate');
+		 			_this.getThisData();
  				}	 			
 	 		});
  		}
  		
  	}
-
+ 	// 获取当前层级数据
+ 	Private.prototype.getThisData = function(){
+ 		let value = this.param.prop.value
+ 			,children = this.param.prop.children
+ 			,chooseData = this.store.chooseData
+ 			,data = this.store.data;
+ 		for(let i in chooseData){
+ 			for(let x in data){
+ 				if(chooseData[i] == data[x][value]){
+ 					if(data[x][children]){
+ 						data = data[x][children];
+ 					}else{
+ 						data = data[x];
+ 					}
+ 					
+ 					break;
+ 				}
+ 			}
+ 		}
+ 		return data;
+ 	}
  	// 鼠标监听事件[input控件]
  	Private.prototype.inputClick = function(options){
  		let store = this.store;
@@ -496,14 +517,22 @@
  			let obj = this.elemCheck(elem);
  			if(type == "click"){
  				obj.store.model.on('click','li',function(){
- 					callback();
+ 					let data = obj.getThisData();
+ 					if(obj.param.clicklast == false){
+ 						callback(data);
+ 					}else{
+ 						if(obj.store.parentNextAll.length == 0){
+ 							callback(data);
+ 						}
+ 					}
+ 					
  				});
  			}else if(type == "hover"){
  				obj.store.model.on('mouseenter','li',function(){
  					callback();
  				});
  			}
- 		}
+ 		},
  		// elem位置判断，禁止外界调用，因为你调也没啥卵用
  		elemCheck:function(elem){
  			if(!elem){

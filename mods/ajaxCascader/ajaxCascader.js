@@ -305,11 +305,32 @@ layui.define(["jquery"], function (exports) {
           store.showCascader = !store.showCascader;
           store.model.slideUp(_this.param.time);
           store.inputI.removeClass('rotate');
+          _this.getThisData();
         }
       });
     }
   };
+  // 获取当前层级数据
+  Private.prototype.getThisData = function () {
+    var value = this.param.prop.value,
+        children = this.param.prop.children,
+        chooseData = this.store.chooseData,
+        data = this.store.data;
+    for (var i in chooseData) {
+      for (var x in data) {
+        if (chooseData[i] == data[x][value]) {
+          if (data[x][children]) {
+            data = data[x][children];
+          } else {
+            data = data[x];
+          }
 
+          break;
+        }
+      }
+    }
+    return data;
+  };
   // 鼠标监听事件[input控件]
   Private.prototype.inputClick = function (options) {
     var store = this.store;
@@ -487,17 +508,6 @@ layui.define(["jquery"], function (exports) {
       privates[dom_num].obj.init(options);
       dom_num++;
     },
-    // elem位置判断
-    elemCheck: function elemCheck(elem) {
-      if (!elem) {
-        return privates[0].obj;
-      }
-      for (var i in privates) {
-        if (privates[i].elem == elem) {
-          return privates[i].obj;
-        }
-      }
-    },
     // 获取页面中选中的数据，数组形式
     getChooseData: function getChooseData(elem) {
       var obj = this.elemCheck(elem);
@@ -508,12 +518,30 @@ layui.define(["jquery"], function (exports) {
       var obj = this.elemCheck(elem);
       if (type == "click") {
         obj.store.model.on('click', 'li', function () {
-          callback();
+          var data = obj.getThisData();
+          if (obj.param.clicklast == false) {
+            callback(data);
+          } else {
+            if (obj.store.parentNextAll.length == 0) {
+              callback(data);
+            }
+          }
         });
       } else if (type == "hover") {
         obj.store.model.on('mouseenter', 'li', function () {
           callback();
         });
+      }
+    },
+    // elem位置判断，禁止外界调用，因为你调也没啥卵用
+    elemCheck: function elemCheck(elem) {
+      if (!elem) {
+        return privates[0].obj;
+      }
+      for (var i in privates) {
+        if (privates[i].elem == elem) {
+          return privates[i].obj;
+        }
       }
     }
   };

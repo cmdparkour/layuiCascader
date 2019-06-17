@@ -105,13 +105,13 @@
             // checkData:['100','200'] // 回显数据
 
             $('.layui-btn').click(function(){
-                
+                console.log(cascader.getChooseData('#demo1'))
             })
 
             // 监听选中的事件
-            cascader.on('click','#demo1',function(){
+            cascader.on('click','#demo1',function(data){
                 // 获取当前已选中的数据,可单独使用
-                console.log(cascader.getChooseData('#demo1'))
+                console.log(data)
             });
         });
 	</script>
