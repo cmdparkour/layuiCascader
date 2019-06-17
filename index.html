@@ -32,7 +32,8 @@
 
             // Ajax传参模式
         	cascader.load({
-                elem:'#demo1'                          
+                elem:'#demo1'  
+                ,clicklast:true                        
                 ,value:0  
                 ,getChildren:function(value,callback){  
                     var data = [];                  
@@ -100,6 +101,7 @@
             // }
             // time:250    // 下拉菜单显示出来的时间
             // showlast:false  // 是否只显示选中的最后一级
+            // clicklast:false // 是否最后一级才可点击
             // checkData:['100','200'] // 回显数据
 
             $('.layui-btn').click(function(){

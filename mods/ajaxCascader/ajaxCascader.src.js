@@ -25,6 +25,7 @@
  				label:"label",
  				children:'children'
  			},
+ 			clicklast:false,
  			time:250,
  			placeholder:"请选择"
  		},
@@ -286,16 +287,27 @@
  	Private.prototype.liClick = function(){
  		let _this = this;
  		let store = this.store;
+ 		let param = this.param;
  		// store.model为一个自定义dom对象
- 		// mouseenter能正常执行程序
- 		// click则不行
- 		// store.model.on('mouseenter','li',function(){
- 		store.model.on('click','li',function(){
- 			_this.getChooseData();
- 			store.showCascader = !store.showCascader;
- 			store.model.slideUp(_this.param.time);
- 			store.inputI.removeClass('rotate');
- 		});
+ 		if(param.clicklast == false){
+ 			store.model.on('click','li',function(){
+	 			_this.getChooseData();
+	 			store.showCascader = !store.showCascader;
+	 			store.model.slideUp(_this.param.time);
+	 			store.inputI.removeClass('rotate');
+	 		});
+ 		}else{
+ 			store.model.on('click','li',function(){
+ 				store.parentNextAll = $(this).parent("ul").nextAll();
+ 				if(store.parentNextAll.length == 0){
+ 					_this.getChooseData();
+		 			store.showCascader = !store.showCascader;
+		 			store.model.slideUp(_this.param.time);
+		 			store.inputI.removeClass('rotate');
+ 				}	 			
+	 		});
+ 		}
+ 		
  	}
 
  	// 鼠标监听事件[input控件]
