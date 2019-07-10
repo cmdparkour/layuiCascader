@@ -501,12 +501,21 @@ layui.define(["jquery"], function (exports) {
 
     // 页面初始化
     load: function load(options) {
-      privates[dom_num] = new Array();
-      privates[dom_num].elem = options.elem;
-      privates[dom_num].obj = new Private();
-      privates[dom_num].obj.store.zIndex -= dom_num;
-      privates[dom_num].obj.init(options);
-      dom_num++;
+      var current = null;
+      for (var i in privates) {
+        if (privates[i].elem === options.elem) {
+          current = i;
+        }
+      }
+      if (!current) {
+        current = dom_num;
+        dom_num++;
+      }
+      privates[current] = new Array();
+      privates[current].elem = options.elem;
+      privates[current].obj = new Private();
+      privates[current].obj.store.zIndex -= current;
+      privates[current].obj.init(options);
     },
     // 获取页面中选中的数据，数组形式
     getChooseData: function getChooseData(elem) {
