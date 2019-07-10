@@ -428,19 +428,29 @@ layui.define(["jquery"], function (exports) {
     backData[0] = store.data;
     var flag = 1;
     if (param.getChildren) {
-      var _loop = function _loop(i) {
-        if (i < checkData.length) {
-          param.getChildren(checkData[i - 1], function (data) {
-            backData[i] = data;
+      if (checkData.length === 1) {
+        for (var i in store.data) {
+          if (store.data[i][param.prop.value] == checkData[0]) {
+            var label = store.data[i][param.prop.label].split(',');
+            this.inputValueChange(label);
+            return;
+          }
+        }
+      }
+
+      var _loop = function _loop(_i2) {
+        if (_i2 < checkData.length) {
+          param.getChildren(checkData[_i2 - 1], function (data) {
+            backData[_i2] = data;
             flag++;
             if (flag == checkData.length) {
-              for (var _i2 = checkData.length - 1; _i2 >= 0; _i2--) {
-                for (var x in backData[_i2]) {
-                  if (checkData[_i2] == backData[_i2][x][param.prop.value]) {
+              for (var _i3 = checkData.length - 1; _i3 >= 0; _i3--) {
+                for (var x in backData[_i3]) {
+                  if (checkData[_i3] == backData[_i3][x][param.prop.value]) {
                     keys.unshift(x);
-                    chooseLabel.unshift(backData[_i2][x][param.prop.label]);
-                    if (_i2 < checkData.length - 1) {
-                      backData[_i2][x][param.prop.children] = backData[_i2 + 1];
+                    chooseLabel.unshift(backData[_i3][x][param.prop.label]);
+                    if (_i3 < checkData.length - 1) {
+                      backData[_i3][x][param.prop.children] = backData[_i3 + 1];
                     }
                   }
                 }
@@ -452,28 +462,28 @@ layui.define(["jquery"], function (exports) {
               _this5.clearModel();
               // 选择器数据回显
               var key = [];
-              for (var _i3 in backData) {
-                if (_i3 !== "0") {
-                  key.push(keys[_i3 - 1]);
+              for (var _i4 in backData) {
+                if (_i4 !== "0") {
+                  key.push(keys[_i4 - 1]);
                 }
-                _this5.liHtml(backData[_i3], key, keys[_i3]);
+                _this5.liHtml(backData[_i4], key, keys[_i4]);
               }
             }
           });
         }
       };
 
-      for (var i = 1; i < checkData.length; i++) {
-        _loop(i);
+      for (var _i2 = 1; _i2 < checkData.length; _i2++) {
+        _loop(_i2);
       }
     } else {
       var storeData = store.data;
       for (var x in checkData) {
-        for (var _i4 in storeData) {
-          if (storeData[_i4][param.prop.value] == checkData[x]) {
-            chooseLabel.push(storeData[_i4][param.prop.label]);
-            keys.push(_i4);
-            storeData = storeData[_i4][param.prop.children];
+        for (var _i5 in storeData) {
+          if (storeData[_i5][param.prop.value] == checkData[x]) {
+            chooseLabel.push(storeData[_i5][param.prop.label]);
+            keys.push(_i5);
+            storeData = storeData[_i5][param.prop.children];
             break;
           }
         }
@@ -528,7 +538,7 @@ layui.define(["jquery"], function (exports) {
       if (type == "click") {
         obj.store.model.on('click', 'li', function () {
           var data = obj.getThisData();
-          if (obj.param.clicklast == false) {
+          if (obj.param.clicklast === false) {
             callback(data);
           } else {
             if (obj.store.parentNextAll.length == 0) {

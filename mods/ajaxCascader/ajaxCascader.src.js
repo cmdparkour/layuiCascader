@@ -428,7 +428,16 @@
  		backData[0] = store.data;
  		let flag = 1;
  		if(param.getChildren){
- 			for(let i=1;i<checkData.length;i++){
+ 			if (checkData.length === 1) {
+ 				for (let i in store.data) {
+ 					if (store.data[i][param.prop.value] == checkData[0]) {
+ 						let label = store.data[i][param.prop.label].split(',')
+ 						this.inputValueChange(label)
+ 						return
+ 					}
+ 				}	
+ 			}
+ 			for(let i=1; i<checkData.length; i++){
 	 			if(i < checkData.length){
 	 				param.getChildren(checkData[i-1],data=>{
 		 				backData[i] = data;
@@ -522,12 +531,12 @@
  			return obj.store.chooseData;
  		},
  		// 监听方法
- 		on:function(type,elem,callback){
+ 		on: function(type,elem,callback){
  			let obj = this.elemCheck(elem);
  			if(type == "click"){
  				obj.store.model.on('click','li',function(){
  					let data = obj.getThisData();
- 					if(obj.param.clicklast == false){
+ 					if(obj.param.clicklast === false){
  						callback(data);
  					}else{
  						if(obj.store.parentNextAll.length == 0){
