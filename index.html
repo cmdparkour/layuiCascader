@@ -32,8 +32,7 @@
 
             // Ajax传参模式
         	cascader.load({
-                elem:'#demo1'  
-                ,clicklast:true                        
+                elem:'#demo1'                     
                 ,value:0  
                 ,getChildren:function(value,callback){  
                     var data = [];                  
@@ -52,7 +51,8 @@
                             callback(data);
                         }
                     });
-                }      
+                },
+                checkData: ["520000000000"]
             });
 
             // 直接赋值模式

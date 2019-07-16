@@ -15,7 +15,6 @@
 */
 layui.define(["jquery"], function (exports) {
   var $ = layui.jquery;
-
   // 私有方法，禁止外面调用的方法
   function Private() {
     //页面初始化默认值
@@ -44,7 +43,8 @@ layui.define(["jquery"], function (exports) {
       brother: null, // li标签同级dom集合
       data: [], // 所有从后端异步请求的数据集合
       chooseData: [], // 已选中的数据集
-      zIndex: 2000 };
+      zIndex: 2000 // 显示顺序
+    };
   }
 
   // 页面初始化
@@ -57,6 +57,7 @@ layui.define(["jquery"], function (exports) {
     store.cascaderDom = $(options.elem);
 
     // 把用户的参数值进行存储
+    // 开始存储
     for (var i in options) {
       if (options[i].length !== 0) {
         if (i == "prop") {
@@ -68,7 +69,6 @@ layui.define(["jquery"], function (exports) {
         }
       }
     }
-
     delete param.data;
     if (options.data) {
       store.data = options.data;
@@ -179,8 +179,6 @@ layui.define(["jquery"], function (exports) {
     left = input.offset().left - model.position().left;
     if (BodyWidth < modelWidth) {
       positionLeft = BodyWidth - modelWidth;
-    } else {
-      // right = BodyWidth - modelWidth;
     }
     if (positionLeft < 0) {
       model.css("left", positionLeft - 30);
@@ -315,21 +313,25 @@ layui.define(["jquery"], function (exports) {
     var value = this.param.prop.value,
         children = this.param.prop.children,
         chooseData = this.store.chooseData,
-        data = this.store.data;
+        data = this.store.data,
+        currentData = [];
     for (var i in chooseData) {
       for (var x in data) {
         if (chooseData[i] == data[x][value]) {
+          if (Number(i) === chooseData.length - 1) {
+            currentData = JSON.parse(JSON.stringify(data[x]));
+            break;
+          }
           if (data[x][children]) {
             data = data[x][children];
           } else {
             data = data[x];
           }
-
           break;
         }
       }
     }
-    return data;
+    return currentData;
   };
   // 鼠标监听事件[input控件]
   Private.prototype.inputClick = function (options) {

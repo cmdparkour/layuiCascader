@@ -13,67 +13,66 @@
  */
  layui.define(["jquery"],(exports)=>{
  	let $ = layui.jquery;
-
  	// 私有方法，禁止外面调用的方法
  	function Private(){
  		//页面初始化默认值
  		this.param = {   
- 			width:220,
- 			height:40,
- 			prop:{
- 				value:"value",
- 				label:"label",
- 				children:'children'
+ 			width: 220,
+ 			height: 40,
+ 			prop: {
+ 				value: "value",
+ 				label: "label",
+ 				children: 'children'
  			},
- 			clicklast:false,
- 			time:250,
- 			placeholder:"请选择"
+ 			clicklast: false,
+ 			time: 250,
+ 			placeholder: "请选择"
  		},
  		// 定义全局状态仓库
  		this.store = {
-	 		showCascader:false,
-	 		cascaderDom:null,					// 当前elem对象
-	 		cascaderAll:null,					// 生成的Dom主对象
-	 		input:null,							// input框dom
-	 		inputI:null,						// input框箭头dom
-	 		model:null,							// 下拉菜单的主dom
-	 		li:null,							// li标签
-	 		parentNextAll:null,					// 当前操作的li标签元素后面所有ul集合
-	 		brother:null,						// li标签同级dom集合
-	 		data:[],							// 所有从后端异步请求的数据集合
-	 		chooseData:[],						// 已选中的数据集
-	 		zIndex:2000,						// 显示顺序
+	 		showCascader: false,
+	 		cascaderDom: null,					// 当前elem对象
+	 		cascaderAll: null,					// 生成的Dom主对象
+	 		input: null,						// input框dom
+	 		inputI: null,						// input框箭头dom
+	 		model: null,						// 下拉菜单的主dom
+	 		li: null,							// li标签
+	 		parentNextAll: null,				// 当前操作的li标签元素后面所有ul集合
+	 		brother: null,						// li标签同级dom集合
+	 		data: [],							// 所有从后端异步请求的数据集合
+	 		chooseData: [],						// 已选中的数据集
+	 		zIndex: 2000						// 显示顺序
 	 	}
  	}
 
  	// 页面初始化
  	Private.prototype.init = function(options){
- 		let store = this.store;
- 		let param = this.param;
+ 		let store = this.store
+ 		let param = this.param
  		// dom变量初始化
- 		store.cascaderDom = $(options.elem); 		
+ 		store.cascaderDom = $(options.elem)	
 
  		// 把用户的参数值进行存储
- 		for(let i in options){
- 			if(options[i].length !== 0){
- 				if(i == "prop"){
- 					for(let x in options[i]){
- 						param[i][x] = options[i][x];
+ 		// 开始存储
+ 		for (let i in options) {
+ 			if (options[i].length !== 0) {
+ 				if (i == "prop") {
+ 					for (let x in options[i]) {
+ 						param[i][x] = options[i][x]
  					}
- 				}else{
- 					param[i] = options[i];
+ 				} else {
+ 					param[i] = options[i]
  				}
  			}
  		}
-
- 		delete param.data;
- 		if(options.data){
- 			store.data = options.data;
+ 		delete param.data
+ 		if (options.data) {
+ 			store.data = options.data
  		}
  		// 存储结束
 
- 		if(store.cascaderDom.next().hasClass('cascader-all')){
- 			store.cascaderDom.next().remove();
+ 		if (store.cascaderDom.next().hasClass('cascader-all')) {
+ 			store.cascaderDom.next().remove()
  		}
  		// 渲染主dom
  		store.cascaderDom.after(`
@@ -83,7 +82,7 @@
 				<div class="cascader-model" style="z-index:`+this.store.zIndex+`;display:flex;">
 				</div>
 			</div>
- 		`);
+ 		`)
 
  		// 判断elem是否存在以及是否正确，elem必填
  		if(!options.elem || options.elem == ""){
@@ -92,299 +91,301 @@
  			layer.msg('请配置有效的elem值 ')
  		}
 
-		store.input = store.cascaderDom.nextAll().find('.cascader-input');
-		store.inputI = store.input.next();
- 		store.model = store.cascaderDom.nextAll().find('.cascader-model');
- 		store.li = store.model.find('li');
+		store.input = store.cascaderDom.nextAll().find('.cascader-input')
+		store.inputI = store.input.next()
+ 		store.model = store.cascaderDom.nextAll().find('.cascader-model')
+ 		store.li = store.model.find('li')
  		// 全局状态初始化
- 		store.model.hide();
- 		if(store.data.length == 0){
- 			param.getChildren(param.value,(data)=>{
- 				store.data = data;
- 				this.liHtml(store.data);
- 				if(param.checkData){
-		 			if(param.checkData.length > 0){
-			 			this.dataToshow(param.checkData);
+ 		store.model.hide()
+ 		if (store.data.length == 0) {
+ 			param.getChildren(param.value, data => {
+ 				store.data = data
+ 				this.liHtml(store.data)
+ 				if (param.checkData) {
+		 			if (param.checkData.length > 0) {
+			 			this.dataToshow(param.checkData)
 			 		}
 		 		}
  			})
- 		}else{
- 			this.liHtml(store.data);
- 			if(param.checkData){
-	 			if(param.checkData.length > 0){
-		 			this.dataToshow(param.checkData);
+ 		} else {
+ 			this.liHtml(store.data)
+ 			if (param.checkData) {
+	 			if (param.checkData.length > 0) {
+		 			this.dataToshow(param.checkData)
 		 		}
 	 		}
  		}
- 		this.inputClick(options);
- 		this.liClick();	
- 		this.liHover();	
- 		this.modelHandle();	 			
+ 		this.inputClick(options)
+ 		this.liClick()
+ 		this.liHover()
+ 		this.modelHandle()			
  	}
 
  	// li标签赋值方法
  	// key为string类型
- 	Private.prototype.liHtml = function(data,key,choose){
- 		let lis=[];
- 		let param = this.param;
- 		let store = this.store;
- 		let position = [];
- 		if(!key || key.length == 0){
+ 	Private.prototype.liHtml = function(data, key, choose){
+ 		let lis=[]
+ 		let param = this.param
+ 		let store = this.store
+ 		let position = []
+ 		if (!key || key.length == 0) {
  			key=""
- 		}else{
- 			key = key.join('-');
- 			key=key+"-";
+ 		} else {
+ 			key = key.join('-')
+ 			key = key+"-"
  		}
- 		if(data !== ""){
- 			for(let i in data){
- 				let li = '<li value="'+data[i][param.prop.value]+'" key="'+key+i+'"';
- 				if(i == choose){
- 					li = li +' class="cascader-choose-active"';
- 					position = [i,data.length];
+ 		if (data !== "") {
+ 			for (let i in data) {
+ 				let li = '<li value="'+data[i][param.prop.value]+'" key="'+key+i+'"'
+ 				if (i == choose) {
+ 					li = li +' class="cascader-choose-active"'
+ 					position = [i,data.length]
  				}
- 				if(data[i].hasChild == true || data[i].children){
- 					li = li+'>'+data[i][param.prop.label]+'<i class="layui-icon layui-icon-right"></i></li>';
- 				}else{
- 					li = li+'>'+data[i][param.prop.label]+'</li>';
+ 				if (data[i].hasChild == true || data[i].children) {
+ 					li = li+'>'+data[i][param.prop.label]+'<i class="layui-icon layui-icon-right"></i></li>'
+ 				} else {
+ 					li = li+'>'+data[i][param.prop.label]+'</li>'
  				}
- 				lis.push(li);
+ 				lis.push(li)
  			}
  		}
- 		lis = lis.join('');
+ 		lis = lis.join('')
  		let ul = $(`
 			<ul class="cascader-ul">`+lis+`</ul>
-		`);
-		ul.fadeIn('fast');
-		store.model.append(ul);
-		this.liPosition(position);
-		this.ModelPosition();
+		`)
+		ul.fadeIn('fast')
+		store.model.append(ul)
+		this.liPosition(position)
+		this.ModelPosition()
  	}
  	// 当前选中的跳转位置
- 	Private.prototype.liPosition = function(position){
- 		let model = this.store.model.find('ul').last();
+ 	Private.prototype.liPosition = function(position) {
+ 		let model = this.store.model.find('ul').last()
  	}
- 	Private.prototype.modelHandle = function(){
- 		$(window).resize(()=>{          //当浏览器大小变化时
-		    let model = this.store.model;
-		    this.ModelPosition();
+ 	Private.prototype.modelHandle = function() {
+ 		$(window).resize(() => {          //当浏览器大小变化时
+		    let model = this.store.model
+		    this.ModelPosition()
 		});
  	}
- 	let modelWidth = 0;
- 	Private.prototype.ModelPosition = function(){
- 		let model = this.store.model;
- 		let input = this.store.input;
- 		let BodyWidth = document.documentElement.clientWidth;
+ 	let modelWidth = 0
+ 	Private.prototype.ModelPosition = function() {
+ 		let model = this.store.model
+ 		let input = this.store.input
+ 		let BodyWidth = document.documentElement.clientWidth
  		let positionLeft = 0,
- 			left = 0;
- 		if(window.getComputedStyle(model[0]).width !== "auto"){
- 			modelWidth = window.getComputedStyle(model[0]).width.replace('px','');
+ 			left = 0
+ 		if (window.getComputedStyle(model[0]).width !== "auto") {
+ 			modelWidth = window.getComputedStyle(model[0]).width.replace('px','')
  		}
- 		left = input.offset().left - model.position().left;
- 		if(BodyWidth < modelWidth){
- 			positionLeft = BodyWidth - modelWidth;
- 		}else{
- 			// right = BodyWidth - modelWidth;
+ 		left = input.offset().left - model.position().left
+ 		if (BodyWidth < modelWidth) {
+ 			positionLeft = BodyWidth - modelWidth
  		}
- 		if(positionLeft < 0){
- 			model.css("left",positionLeft - 30);
- 		}else{
- 			model.css('left',0);
+ 		if (positionLeft < 0) {
+ 			model.css("left",positionLeft - 30)
+ 		} else {
+ 			model.css('left',0)
  		}
  	}
  	// 鼠标hover监听事件[li标签]
  	Private.prototype.liHover = function(){
- 		let store = this.store;
- 		let param = this.param;
- 		let _this = this;
- 		store.model.on('mouseenter','li',function(){
- 			store.parentNextAll = $(this).parent("ul").nextAll();
- 			store.brother = $(this).siblings();
- 			if($(this).find('i').length == 0){
- 				store.parentNextAll.fadeOut('fast',function(){
- 					store.parentNextAll.remove();
+ 		let store = this.store
+ 		let param = this.param
+ 		let _this = this
+ 		store.model.on('mouseenter', 'li', function() {
+ 			store.parentNextAll = $(this).parent("ul").nextAll()
+ 			store.brother = $(this).siblings()
+ 			if ($(this).find('i').length == 0) {
+ 				store.parentNextAll.fadeOut('fast', function() {
+ 					store.parentNextAll.remove()
  				})
- 			}else{
- 				let keys=$(this).attr('key');
- 				let value = $(this).attr('value');				
-				let data = _this.store.data;
-				let childrenName = _this.param.prop.children;
-				keys = keys.split('-');
-				let goodData = data;
+ 			} else {
+ 				let keys=$(this).attr('key')
+ 				let value = $(this).attr('value')			
+				let data = _this.store.data
+				let childrenName = _this.param.prop.children
+				keys = keys.split('-')
+				let goodData = data
 
-				for(let i in keys){
-					let key = keys[i];
-					if(goodData){
-						if(goodData[key]){
-							goodData = goodData[key][childrenName];
+				for (let i in keys) {
+					let key = keys[i]
+					if (goodData) {
+						if (goodData[key]) {
+							goodData = goodData[key][childrenName]
 						}
 					}
 					
 				}
 				
-				if(!goodData){
-					param.getChildren(value,datax=>{
-						goodData = datax;
-						let children = data;
-						if(goodData && goodData.length != 0){
-							for(let i in keys){
-								if(i == keys.length - 1){
-									children = goodData;
-								}else{
-									if(!children[keys[i]][childrenName]){
-										children[keys[i]][childrenName] = new Array();
+				if (!goodData) {
+					param.getChildren(value, datax => {
+						goodData = datax
+						let children = data
+						if (goodData && goodData.length != 0) {
+							for (let i in keys) {
+								if (i == keys.length - 1) {
+									children = goodData
+								} else {
+									if (!children[keys[i]][childrenName]) {
+										children[keys[i]][childrenName] = new Array()
 									}
-									children = children[keys[i]][childrenName];
+									children = children[keys[i]][childrenName]
 								}
 							}
-							DataTreeAdd(data,goodData,keys);
-							store.parentNextAll = $(this).parent("ul").nextAll();
-							store.parentNextAll.remove();
-							_this.liHtml(goodData,keys);
-						}else{
-							$(this).find('i').remove();
-							store.parentNextAll.remove();
-							DataTreeChange(data,keys);
+							DataTreeAdd(data,goodData,keys)
+							store.parentNextAll = $(this).parent("ul").nextAll()
+							store.parentNextAll.remove()
+							_this.liHtml(goodData, keys)
+						} else {
+							$(this).find('i').remove()
+							store.parentNextAll.remove()
+							DataTreeChange(data, keys)
 						}
-					});										
-				}else{
-					store.parentNextAll.remove();
-					_this.liHtml(goodData,keys);
+					})									
+				} else {
+					store.parentNextAll.remove()
+					_this.liHtml(goodData, keys)
 				}
 				// 增加data的树结点
-				function DataTreeAdd(data,newData,keys){
-					let array = data;
-					for(let k in keys){
-						if(k < keys.length -1){
-							array = array[keys[k]][param.prop.children];
-						}else{
-							array = array[keys[k]];
+				function DataTreeAdd(data, newData, keys) {
+					let array = data
+					for (let k in keys) {
+						if (k < keys.length -1) {
+							array = array[keys[k]][param.prop.children]
+						} else {
+							array = array[keys[k]]
 						}						
 					}
-					array.children = newData;
+					array.children = newData
 				}
-				function DataTreeChange(data,keys){
-					let array = data;
-					for(let k in keys){
-						if(k < keys.length -1){
-							array = array[keys[k]][param.prop.children];
-						}else{
-							array = array[keys[k]];
+				function DataTreeChange(data, keys) {
+					let array = data
+					for (let k in keys) {
+						if (k < keys.length -1) {
+							array = array[keys[k]][param.prop.children]
+						} else {
+							array = array[keys[k]]
 						}
 					}
-					array.hasChild = false;
+					array.hasChild = false
 				}
 								
  			}			
-			$(this).addClass('cascader-choose-active');
- 			store.brother.removeClass('cascader-choose-active');
- 			store.parentNextAll.children().removeClass('cascader-choose-active');
+			$(this).addClass('cascader-choose-active')
+ 			store.brother.removeClass('cascader-choose-active')
+ 			store.parentNextAll.children().removeClass('cascader-choose-active')
 
  			// 获取所有的已选中的数据，并回显至input选择框中
  			// _this.getChooseData();
  		});
  	}
  	// 鼠标点击监听事件[li标签]
- 	Private.prototype.liClick = function(){
- 		let _this = this;
- 		let store = this.store;
- 		let param = this.param;
+ 	Private.prototype.liClick = function() {
+ 		let _this = this
+ 		let store = this.store
+ 		let param = this.param
  		// store.model为一个自定义dom对象
- 		if(param.clicklast == false){
- 			store.model.on('click','li',function(){
-	 			_this.getChooseData();
-	 			store.showCascader = !store.showCascader;
-	 			store.model.slideUp(_this.param.time);
-	 			store.inputI.removeClass('rotate');
-	 		});
- 		}else{
- 			store.model.on('click','li',function(){
- 				store.parentNextAll = $(this).parent("ul").nextAll();
- 				if(store.parentNextAll.length == 0){
- 					_this.getChooseData();
-		 			store.showCascader = !store.showCascader;
-		 			store.model.slideUp(_this.param.time);
-		 			store.inputI.removeClass('rotate');
-		 			_this.getThisData();
+ 		if (param.clicklast == false) {
+ 			store.model.on('click', 'li', function() {
+	 			_this.getChooseData()
+	 			store.showCascader = !store.showCascader
+	 			store.model.slideUp(_this.param.time)
+	 			store.inputI.removeClass('rotate')
+	 		})
+ 		} else {
+ 			store.model.on('click', 'li', function() {
+ 				store.parentNextAll = $(this).parent("ul").nextAll()
+ 				if (store.parentNextAll.length == 0) {
+ 					_this.getChooseData()
+		 			store.showCascader = !store.showCascader
+		 			store.model.slideUp(_this.param.time)
+		 			store.inputI.removeClass('rotate')
+		 			_this.getThisData()
  				}	 			
-	 		});
+	 		})
  		}
  		
  	}
  	// 获取当前层级数据
- 	Private.prototype.getThisData = function(){
+ 	Private.prototype.getThisData = function() {
  		let value = this.param.prop.value
  			,children = this.param.prop.children
  			,chooseData = this.store.chooseData
- 			,data = this.store.data;
- 		for(let i in chooseData){
- 			for(let x in data){
- 				if(chooseData[i] == data[x][value]){
- 					if(data[x][children]){
- 						data = data[x][children];
- 					}else{
- 						data = data[x];
+ 			,data = this.store.data
+ 			,currentData = []
+ 		for (const i in chooseData) {
+ 			for (const x in data) {
+ 				if (chooseData[i] == data[x][value]) {
+ 					if (Number(i) === chooseData.length - 1) {
+ 						currentData = JSON.parse(JSON.stringify(data[x]))
+ 						break
  					}
- 					
- 					break;
+ 					if (data[x][children]) {
+ 						data = data[x][children]
+ 					} else {
+ 						data = data[x]
+ 					}
+ 					break
  				}
  			}
  		}
- 		return data;
+ 		return currentData
  	}
  	// 鼠标监听事件[input控件]
- 	Private.prototype.inputClick = function(options){
- 		let store = this.store;
- 		let param = this.param;
- 		let _this = this;
- 		$(document).click(function(e){
- 			let className = e.target.className;
- 			className = className.split(" ");
- 			let other = ['cascader-input','cascader-model',"cascader-choose-active","layui-icon-right","cascader-ul"];
- 			for(let i in className){
- 				for(let x in other){
-					if(className[i] == other[x]){
-	 					return;
+ 	Private.prototype.inputClick = function(options) {
+ 		let store = this.store
+ 		let param = this.param
+ 		let _this = this
+ 		$(document).click(function(e) {
+ 			let className = e.target.className
+ 			className = className.split(" ")
+ 			let other = ['cascader-input','cascader-model',"cascader-choose-active","layui-icon-right","cascader-ul"]
+ 			for (let i in className) {
+ 				for (let x in other) {
+					if (className[i] == other[x]) {
+	 					return
 	 				}
  				}
  				
  			}
- 			store.showCascader = false;
- 			store.model.slideUp(_this.param.time);
-	 		store.inputI.removeClass('rotate');
+ 			store.showCascader = false
+ 			store.model.slideUp(_this.param.time)
+	 		store.inputI.removeClass('rotate')
  		});
- 		store.input.click(function(){
- 			store.showCascader = !store.showCascader;
- 			if(store.showCascader == true){
- 				store.inputI.addClass('rotate'); 					
-	 				let chooseData = _this.store.chooseData;
-	 				if(chooseData.length != 0){
-						let data = _this.store.data;
-		 				let key = [];
-		 				_this.clearModel();
-		 				for(let i in chooseData){
-		 					for(let x in data){
-		 						if(data[x][param.prop.value] == chooseData[i]){
-		 							_this.liHtml(data,key,x);
-		 							key.unshift(x);
-		 							data = data[x][param.prop.children]; 
-		 							break;
+ 		store.input.click(function() {
+ 			store.showCascader = !store.showCascader
+ 			if (store.showCascader == true) {
+ 				store.inputI.addClass('rotate')				
+	 				let chooseData = _this.store.chooseData
+	 				if (chooseData.length != 0) {
+						let data = _this.store.data
+		 				let key = []
+		 				_this.clearModel()
+		 				for (let i in chooseData) {
+		 					for (let x in data) {
+		 						if (data[x][param.prop.value] == chooseData[i]) {
+		 							_this.liHtml(data,key,x)
+		 							key.unshift(x)
+		 							data = data[x][param.prop.children]
+		 							break
 		 						}
 		 					}
 		 				}
 	 				}		
- 				store.model.slideDown(_this.param.time);	
- 				_this.ModelPosition();			
- 			}else{
- 				store.model.slideUp(_this.param.time);
-	 			store.inputI.removeClass('rotate');
+ 				store.model.slideDown(_this.param.time)
+ 				_this.ModelPosition()		
+ 			} else {
+ 				store.model.slideUp(_this.param.time)
+	 			store.inputI.removeClass('rotate')
  			}
  		})
  	}
 
 	// 获取页面中选中的数据
- 	Private.prototype.getChooseData = function(){
- 		let store = this.store;
- 		let chooseDom = store.model.find('li.cascader-choose-active');
+ 	Private.prototype.getChooseData = function() {
+ 		let store = this.store
+ 		let chooseDom = store.model.find('li.cascader-choose-active')
  		let chooseData = [];
  		let chooseLabel = [];
  		for(let i in chooseDom){
