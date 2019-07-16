@@ -4,7 +4,6 @@
  * @Name: 基于layui的异步无限级联选择器
  * @Author: 前端喵
  * 创建时间: 2019/05/23
- * 修改时间：2019/05/27 ----- 2019/05/28
  * 使用说明: 在主文件里面使用layui.config设置，具体方法看index.html
  */
 
@@ -90,6 +89,7 @@ layui.define(["jquery"], function (exports) {
 
     store.input = store.cascaderDom.nextAll().find('.cascader-input');
     store.inputI = store.input.next();
+    store.cascaderAll = $(store.cascaderDom.nextAll()[0]);
     store.model = store.cascaderDom.nextAll().find('.cascader-model');
     store.li = store.model.find('li');
     // 全局状态初始化
@@ -112,10 +112,28 @@ layui.define(["jquery"], function (exports) {
         }
       }
     }
-    this.inputClick(options);
-    this.liClick();
-    this.liHover();
-    this.modelHandle();
+    // 先进入是否禁用判断事件
+    // 不禁用则执行下面的事件
+    this.disabled().then(function (res) {
+      _this2.inputClick(options);
+      _this2.liClick();
+      _this2.liHover();
+      _this2.modelHandle();
+    });
+  };
+
+  // 判断是否禁用
+  Private.prototype.disabled = function () {
+    var disabled = this.param.disabled;
+    var cascaderAll = this.store.cascaderAll;
+    var input = this.store.input;
+    return new Promise(function (resolve, reject) {
+      if (disabled) {
+        cascaderAll.addClass('cascader-disabled');
+      } else {
+        resolve();
+      }
+    });
   };
 
   // li标签赋值方法
@@ -153,10 +171,12 @@ layui.define(["jquery"], function (exports) {
     this.liPosition(position);
     this.ModelPosition();
   };
+
   // 当前选中的跳转位置
   Private.prototype.liPosition = function (position) {
     var model = this.store.model.find('ul').last();
   };
+
   Private.prototype.modelHandle = function () {
     var _this3 = this;
 
@@ -166,6 +186,7 @@ layui.define(["jquery"], function (exports) {
       _this3.ModelPosition();
     });
   };
+
   var modelWidth = 0;
   Private.prototype.ModelPosition = function () {
     var model = this.store.model;
@@ -282,6 +303,7 @@ layui.define(["jquery"], function (exports) {
       // _this.getChooseData();
     });
   };
+
   // 鼠标点击监听事件[li标签]
   Private.prototype.liClick = function () {
     var _this = this;
@@ -308,6 +330,7 @@ layui.define(["jquery"], function (exports) {
       });
     }
   };
+
   // 获取当前层级数据
   Private.prototype.getThisData = function () {
     var value = this.param.prop.value,
@@ -539,14 +562,16 @@ layui.define(["jquery"], function (exports) {
       var obj = this.elemCheck(elem);
       if (type == "click") {
         obj.store.model.on('click', 'li', function () {
-          var data = obj.getThisData();
-          if (obj.param.clicklast === false) {
-            callback(data);
-          } else {
-            if (obj.store.parentNextAll.length == 0) {
+          setTimeout(function () {
+            var data = obj.getThisData();
+            if (obj.param.clicklast === false) {
               callback(data);
+            } else {
+              if (obj.store.parentNextAll.length == 0) {
+                callback(data);
+              }
             }
-          }
+          }, 50);
         });
       } else if (type == "hover") {
         obj.store.model.on('mouseenter', 'li', function () {

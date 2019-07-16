@@ -32,10 +32,10 @@
 
             // Ajax传参模式
         	cascader.load({
-                elem:'#demo1'                     
-                ,value:0  
-                ,getChildren:function(value,callback){  
-                    var data = [];                  
+                elem: '#demo1'                     
+                ,value: 0
+                ,getChildren: function(value,callback){  
+                    var data = []               
                     $.ajax({                         
                         url:'https://open.gog.cn/appz/region/getRegion/'+value,
                         type:'get',

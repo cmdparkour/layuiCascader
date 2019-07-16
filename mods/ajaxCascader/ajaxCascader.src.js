@@ -2,7 +2,6 @@
  * @Name: 基于layui的异步无限级联选择器
  * @Author: 前端喵
  * 创建时间: 2019/05/23
- * 修改时间：2019/05/27 ----- 2019/05/28
  * 使用说明: 在主文件里面使用layui.config设置，具体方法看index.html
  */
 
@@ -93,6 +92,7 @@
 
 		store.input = store.cascaderDom.nextAll().find('.cascader-input')
 		store.inputI = store.input.next()
+		store.cascaderAll = $(store.cascaderDom.nextAll()[0])
  		store.model = store.cascaderDom.nextAll().find('.cascader-model')
  		store.li = store.model.find('li')
  		// 全局状态初始化
@@ -115,11 +115,30 @@
 		 		}
 	 		}
  		}
- 		this.inputClick(options)
- 		this.liClick()
- 		this.liHover()
- 		this.modelHandle()			
+ 		// 先进入是否禁用判断事件
+ 		// 不禁用则执行下面的事件
+ 		this.disabled()
+ 			.then(res => {
+ 				this.inputClick(options)
+				this.liClick()
+				this.liHover()
+				this.modelHandle()
+ 			})
  	}
+
+ 	// 判断是否禁用
+	Private.prototype.disabled = function() {
+		const disabled = this.param.disabled
+		const cascaderAll = this.store.cascaderAll
+		const input = this.store.input
+ 		return new Promise((resolve, reject) => {
+			if (disabled) {
+				cascaderAll.addClass('cascader-disabled')
+			}else{
+				resolve()
+			}
+		})
+	}
 
  	// li标签赋值方法
  	// key为string类型
@@ -158,16 +177,19 @@
 		this.liPosition(position)
 		this.ModelPosition()
  	}
+
  	// 当前选中的跳转位置
  	Private.prototype.liPosition = function(position) {
  		let model = this.store.model.find('ul').last()
  	}
+
  	Private.prototype.modelHandle = function() {
  		$(window).resize(() => {          //当浏览器大小变化时
 		    let model = this.store.model
 		    this.ModelPosition()
-		});
+		})
  	}
+
  	let modelWidth = 0
  	Private.prototype.ModelPosition = function() {
  		let model = this.store.model
@@ -280,6 +302,7 @@
  			// _this.getChooseData();
  		});
  	}
+
  	// 鼠标点击监听事件[li标签]
  	Private.prototype.liClick = function() {
  		let _this = this
@@ -307,6 +330,7 @@
  		}
  		
  	}
+
  	// 获取当前层级数据
  	Private.prototype.getThisData = function() {
  		let value = this.param.prop.value
@@ -536,15 +560,16 @@
  			let obj = this.elemCheck(elem);
  			if(type == "click"){
  				obj.store.model.on('click','li',function(){
- 					let data = obj.getThisData();
- 					if(obj.param.clicklast === false){
- 						callback(data);
- 					}else{
- 						if(obj.store.parentNextAll.length == 0){
- 							callback(data);
- 						}
- 					}
- 					
+ 					setTimeout(function(){
+ 						let data = obj.getThisData()
+	 					if(obj.param.clicklast === false){
+	 						callback(data)
+	 					}else{
+	 						if(obj.store.parentNextAll.length == 0){
+	 							callback(data)
+	 						}
+	 					}
+ 					},50) 					
  				});
  			}else if(type == "hover"){
  				obj.store.model.on('mouseenter','li',function(){

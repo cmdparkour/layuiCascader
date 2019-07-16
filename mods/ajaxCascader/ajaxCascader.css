@@ -5,9 +5,28 @@ html #layuicss-ajaxCascader{
 .cascader-all{
     position: relative;
 }
+/* 禁用状态 */
+.cascader-disabled{
+    
+}
+.cascader-disabled .cascader-input{
+    color: #c0c4cc;
+    cursor: not-allowed;
+}
+.cascader-disabled .cascader-input:focus{
+    border-color:#e6e6e6 !important;
+    outline: none;
+}
+.cascader-disabled .cascader-i{
+    color: #c0c4cc;
+}
 .cascader-input{
     border-radius: 4px;
     padding-right: 32px;
+    cursor: pointer;
+}
+.cascader-input.search-input{
+    cursor: default;
 }
 .cascader-input:focus{
     border-color: #409eff !important;
