@@ -32,7 +32,12 @@
 
             // Ajax传参模式
         	cascader.load({
-                elem: '#demo1'                     
+                elem: '#demo1'
+                ,search: {
+                    show: true,
+                    minLabel: 5,
+                    placeholder: '请输入搜索词'
+                }             
                 ,value: 0
                 ,getChildren: function(value,callback){  
                     var data = []               
@@ -52,7 +57,7 @@
                         }
                     });
                 },
-                checkData: ["520000000000"]
+                checkData: ["520000000000", "520100000000"]
             });
 
             // 直接赋值模式

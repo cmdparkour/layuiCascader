@@ -27,7 +27,12 @@ layui.define(["jquery"], function (exports) {
       },
       clicklast: false,
       time: 250,
-      placeholder: "请选择"
+      placeholder: "请选择",
+      search: {
+        show: false,
+        minLabel: 5,
+        placeholder: '请输入搜索词'
+      }
     },
     // 定义全局状态仓库
     this.store = {
@@ -45,7 +50,6 @@ layui.define(["jquery"], function (exports) {
       zIndex: 2000 // 显示顺序
     };
   }
-
   // 页面初始化
   Private.prototype.init = function (options) {
     var _this2 = this;
@@ -57,14 +61,14 @@ layui.define(["jquery"], function (exports) {
 
     // 把用户的参数值进行存储
     // 开始存储
-    for (var i in options) {
-      if (options[i].length !== 0) {
-        if (i == "prop") {
-          for (var x in options[i]) {
-            param[i][x] = options[i][x];
+    for (var _i in options) {
+      if (options[_i].length !== 0) {
+        if (_i == "prop" | _i == 'search') {
+          for (var x in options[_i]) {
+            param[_i][x] = options[_i][x];
           }
         } else {
-          param[i] = options[i];
+          param[_i] = options[_i];
         }
       }
     }
@@ -72,13 +76,18 @@ layui.define(["jquery"], function (exports) {
     if (options.data) {
       store.data = options.data;
     }
+    param.device = this.checkDevice();
     // 存储结束
-
     if (store.cascaderDom.next().hasClass('cascader-all')) {
       store.cascaderDom.next().remove();
     }
+    param.className = 'cascader-' + this.param.elem.replace('#', '');
+    var phoneName = '';
+    if (param.device === 1) {
+      phoneName = 'cascader-model-phone';
+    }
     // 渲染主dom
-    store.cascaderDom.after("\n\t\t\t<div class=\"cascader-all\" style=\"width:" + this.param.width + "px;\">\n\t\t\t\t<input type=\"text\" class=\"layui-input cascader-input\" placeholder=\"" + param.placeholder + "\" readonly style=\"width:" + this.param.width + "px;height:" + this.param.height + "px;\">\n\t\t\t\t<i class=\"layui-icon layui-icon-down cascader-i\" style=\"top:" + this.param.height / 2 + "px;\"></i>\n\t\t\t\t<div class=\"cascader-model\" style=\"z-index:" + this.store.zIndex + ";display:flex;\">\n\t\t\t\t</div>\n\t\t\t</div>\n \t\t");
+    store.cascaderDom.after("\n\t\t\t<div class=\"cascader-all " + param.className + "\" style=\"width:" + this.param.width + "px;\">\n\t\t\t\t<input type=\"text\" class=\"layui-input cascader-input\" placeholder=\"" + param.placeholder + "\" readonly style=\"width:" + this.param.width + "px;height:" + this.param.height + "px;\">\n\t\t\t\t<i class=\"layui-icon layui-icon-down cascader-i\" style=\"top:" + this.param.height / 2 + "px;\"></i>\n\t\t\t\t<div class=\"cascader-model " + phoneName + "\" style=\"z-index:" + this.store.zIndex + ";display:flex;\">\n\t\t\t\t</div>\n\t\t\t</div>\n \t\t");
 
     // 判断elem是否存在以及是否正确，elem必填
     if (!options.elem || options.elem == "") {
@@ -119,6 +128,9 @@ layui.define(["jquery"], function (exports) {
       _this2.liClick();
       _this2.liHover();
       _this2.modelHandle();
+      if (param.search) {
+        _this2.handleSearch();
+      }
     });
   };
 
@@ -143,28 +155,33 @@ layui.define(["jquery"], function (exports) {
     var param = this.param;
     var store = this.store;
     var position = [];
+    var key1 = '';
     if (!key || key.length == 0) {
       key = "";
     } else {
       key = key.join('-');
+      key1 = key;
       key = key + "-";
     }
     if (data !== "") {
-      for (var i in data) {
-        var li = '<li value="' + data[i][param.prop.value] + '" key="' + key + i + '"';
-        if (i == choose) {
+      for (var _i2 in data) {
+        var li = '<li value="' + data[_i2][param.prop.value] + '" key="' + key + _i2 + '"';
+        if (_i2 == choose) {
           li = li + ' class="cascader-choose-active"';
-          position = [i, data.length];
+          position = [_i2, data.length];
         }
-        if (data[i].hasChild == true || data[i].children) {
-          li = li + '>' + data[i][param.prop.label] + '<i class="layui-icon layui-icon-right"></i></li>';
+        if (data[_i2].hasChild == true || data[_i2].children) {
+          li = li + '>' + data[_i2][param.prop.label] + '<i class="layui-icon layui-icon-right"></i></li>';
         } else {
-          li = li + '>' + data[i][param.prop.label] + '</li>';
+          li = li + '>' + data[_i2][param.prop.label] + '</li>';
         }
         lis.push(li);
       }
     }
     lis = lis.join('');
+    if (param.search && data.length > param.search.minLabel) {
+      lis = '<input class="layui-input cascader-model-input" key="' + key1 + '" placeholder="' + param.search.placeholder + '">' + lis;
+    }
     var ul = $("\n\t\t\t<ul class=\"cascader-ul\">" + lis + "</ul>\n\t\t");
     ul.fadeIn('fast');
     store.model.append(ul);
@@ -177,13 +194,60 @@ layui.define(["jquery"], function (exports) {
     var model = this.store.model.find('ul').last();
   };
 
+  Private.prototype.handleSearch = function () {
+    var model = this.store.model;
+    var prop = this.param.prop;
+    var _this = this;
+    var value = '';
+    var flag = true;
+    model.on('compositionstart', function () {
+      flag = false;
+    });
+    model.on('compositionend', function () {
+      flag = true;
+    });
+    model.on('input', 'input', function () {
+      var _this3 = this;
+
+      setTimeout(function () {
+        if (flag) {
+          var data = _this.store.data;
+          if (value == _this3.value) {
+            return;
+          }
+          value = _this3.value;
+          var key = $(_this3).attr('key').split('-');
+          var key1 = $(_this3).attr('key') + '-';
+          for (i in key) {
+            data = data[key[i]][prop.children];
+          }
+          var renderData = [];
+          var lis = '';
+          for (i in data) {
+            if (data[i][prop.label].indexOf(value) > -1) {
+              if (data[i][prop.children] | data[i].hasChild) {
+                lis += '<li value="' + data[i][prop.value] + '" key="' + key1 + i + '">' + data[i][prop.label] + '<i class="layui-icon layui-icon-right"></i></li>';
+              } else {
+                lis += '<li value="' + data[i][prop.value] + '" key="' + key1 + i + '">' + data[i][prop.label] + '</li>';
+              }
+
+              renderData.push(data[i]);
+            }
+          }
+          $(_this3.parentNode).find('li').remove();
+          $(_this3.parentNode).append(lis);
+        }
+      }, 0);
+    });
+  };
+
   Private.prototype.modelHandle = function () {
-    var _this3 = this;
+    var _this4 = this;
 
     $(window).resize(function () {
       //当浏览器大小变化时
-      var model = _this3.store.model;
-      _this3.ModelPosition();
+      var model = _this4.store.model;
+      _this4.ModelPosition();
     });
   };
 
@@ -213,7 +277,7 @@ layui.define(["jquery"], function (exports) {
     var param = this.param;
     var _this = this;
     store.model.on('mouseenter', 'li', function () {
-      var _this4 = this;
+      var _this5 = this;
 
       store.parentNextAll = $(this).parent("ul").nextAll();
       store.brother = $(this).siblings();
@@ -248,15 +312,15 @@ layui.define(["jquery"], function (exports) {
             array.hasChild = false;
           };
 
-          var keys = $(_this4).attr('key');
-          var value = $(_this4).attr('value');
+          var keys = $(_this5).attr('key');
+          var value = $(_this5).attr('value');
           var data = _this.store.data;
           var childrenName = _this.param.prop.children;
           keys = keys.split('-');
           var goodData = data;
 
-          for (var i in keys) {
-            var key = keys[i];
+          for (var _i3 in keys) {
+            var key = keys[_i3];
             if (goodData) {
               if (goodData[key]) {
                 goodData = goodData[key][childrenName];
@@ -269,22 +333,22 @@ layui.define(["jquery"], function (exports) {
               goodData = datax;
               var children = data;
               if (goodData && goodData.length != 0) {
-                for (var _i in keys) {
-                  if (_i == keys.length - 1) {
+                for (var _i4 in keys) {
+                  if (_i4 == keys.length - 1) {
                     children = goodData;
                   } else {
-                    if (!children[keys[_i]][childrenName]) {
-                      children[keys[_i]][childrenName] = new Array();
+                    if (!children[keys[_i4]][childrenName]) {
+                      children[keys[_i4]][childrenName] = new Array();
                     }
-                    children = children[keys[_i]][childrenName];
+                    children = children[keys[_i4]][childrenName];
                   }
                 }
                 DataTreeAdd(data, goodData, keys);
-                store.parentNextAll = $(_this4).parent("ul").nextAll();
+                store.parentNextAll = $(_this5).parent("ul").nextAll();
                 store.parentNextAll.remove();
                 _this.liHtml(goodData, keys);
               } else {
-                $(_this4).find('i').remove();
+                $(_this5).find('i').remove();
                 store.parentNextAll.remove();
                 DataTreeChange(data, keys);
               }
@@ -309,12 +373,15 @@ layui.define(["jquery"], function (exports) {
     var _this = this;
     var store = this.store;
     var param = this.param;
+    var className = param.className;
     // store.model为一个自定义dom对象
     if (param.clicklast == false) {
       store.model.on('click', 'li', function () {
         _this.getChooseData();
         store.showCascader = !store.showCascader;
-        store.model.slideUp(_this.param.time);
+        if (param.device === 1) {} else {
+          store.model.slideUp(_this.param.time);
+        }
         store.inputI.removeClass('rotate');
       });
     } else {
@@ -323,11 +390,23 @@ layui.define(["jquery"], function (exports) {
         if (store.parentNextAll.length == 0) {
           _this.getChooseData();
           store.showCascader = !store.showCascader;
-          store.model.slideUp(_this.param.time);
+          if (param.device === 1) {} else {
+            store.model.slideUp(_this.param.time);
+          }
           store.inputI.removeClass('rotate');
           _this.getThisData();
         }
       });
+    }
+  };
+
+  // 判断当前访问客户端是PC还是移动端
+  // PC端返回1，移动端返回0
+  Private.prototype.checkDevice = function () {
+    if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+      return 1;
+    } else {
+      return 0;
     }
   };
 
@@ -338,10 +417,10 @@ layui.define(["jquery"], function (exports) {
         chooseData = this.store.chooseData,
         data = this.store.data,
         currentData = [];
-    for (var i in chooseData) {
+    for (var _i5 in chooseData) {
       for (var x in data) {
-        if (chooseData[i] == data[x][value]) {
-          if (Number(i) === chooseData.length - 1) {
+        if (chooseData[_i5] == data[x][value]) {
+          if (Number(_i5) === chooseData.length - 1) {
             currentData = JSON.parse(JSON.stringify(data[x]));
             break;
           }
@@ -364,10 +443,10 @@ layui.define(["jquery"], function (exports) {
     $(document).click(function (e) {
       var className = e.target.className;
       className = className.split(" ");
-      var other = ['cascader-input', 'cascader-model', "cascader-choose-active", "layui-icon-right", "cascader-ul"];
-      for (var i in className) {
+      var other = ['cascader-input', 'cascader-model', "cascader-choose-active", "layui-icon-right", "cascader-ul", "cascader-model-input"];
+      for (var _i6 in className) {
         for (var x in other) {
-          if (className[i] == other[x]) {
+          if (className[_i6] == other[x]) {
             return;
           }
         }
@@ -385,9 +464,9 @@ layui.define(["jquery"], function (exports) {
           var data = _this.store.data;
           var key = [];
           _this.clearModel();
-          for (var i in chooseData) {
+          for (var _i7 in chooseData) {
             for (var x in data) {
-              if (data[x][param.prop.value] == chooseData[i]) {
+              if (data[x][param.prop.value] == chooseData[_i7]) {
                 _this.liHtml(data, key, x);
                 key.unshift(x);
                 data = data[x][param.prop.children];
@@ -411,10 +490,10 @@ layui.define(["jquery"], function (exports) {
     var chooseDom = store.model.find('li.cascader-choose-active');
     var chooseData = [];
     var chooseLabel = [];
-    for (var i in chooseDom) {
-      if (chooseDom[i].innerText) {
-        chooseData.push($(chooseDom[i]).attr('value'));
-        chooseLabel.push(chooseDom[i].innerText);
+    for (var _i8 in chooseDom) {
+      if (chooseDom[_i8].innerText) {
+        chooseData.push($(chooseDom[_i8]).attr('value'));
+        chooseLabel.push(chooseDom[_i8].innerText);
       } else {
         break;
       }
@@ -443,7 +522,7 @@ layui.define(["jquery"], function (exports) {
   };
   // 数据回显
   Private.prototype.dataToshow = function (checkData) {
-    var _this5 = this;
+    var _this6 = this;
 
     var param = this.param;
     var store = this.store;
@@ -454,28 +533,28 @@ layui.define(["jquery"], function (exports) {
     var flag = 1;
     if (param.getChildren) {
       if (checkData.length === 1) {
-        for (var i in store.data) {
-          if (store.data[i][param.prop.value] == checkData[0]) {
-            var label = store.data[i][param.prop.label].split(',');
+        for (var _i9 in store.data) {
+          if (store.data[_i9][param.prop.value] == checkData[0]) {
+            var label = store.data[_i9][param.prop.label].split(',');
             this.inputValueChange(label);
             return;
           }
         }
       }
 
-      var _loop = function _loop(_i2) {
-        if (_i2 < checkData.length) {
-          param.getChildren(checkData[_i2 - 1], function (data) {
-            backData[_i2] = data;
+      var _loop = function _loop(_i10) {
+        if (_i10 < checkData.length) {
+          param.getChildren(checkData[_i10 - 1], function (data) {
+            backData[_i10] = data;
             flag++;
             if (flag == checkData.length) {
-              for (var _i3 = checkData.length - 1; _i3 >= 0; _i3--) {
-                for (var x in backData[_i3]) {
-                  if (checkData[_i3] == backData[_i3][x][param.prop.value]) {
+              for (var _i11 = checkData.length - 1; _i11 >= 0; _i11--) {
+                for (var x in backData[_i11]) {
+                  if (checkData[_i11] == backData[_i11][x][param.prop.value]) {
                     keys.unshift(x);
-                    chooseLabel.unshift(backData[_i3][x][param.prop.label]);
-                    if (_i3 < checkData.length - 1) {
-                      backData[_i3][x][param.prop.children] = backData[_i3 + 1];
+                    chooseLabel.unshift(backData[_i11][x][param.prop.label]);
+                    if (_i11 < checkData.length - 1) {
+                      backData[_i11][x][param.prop.children] = backData[_i11 + 1];
                     }
                   }
                 }
@@ -483,32 +562,32 @@ layui.define(["jquery"], function (exports) {
               store.data = backData[0];
 
               // input框数据回显
-              _this5.inputValueChange(chooseLabel);
-              _this5.clearModel();
+              _this6.inputValueChange(chooseLabel);
+              _this6.clearModel();
               // 选择器数据回显
               var key = [];
-              for (var _i4 in backData) {
-                if (_i4 !== "0") {
-                  key.push(keys[_i4 - 1]);
+              for (var _i12 in backData) {
+                if (_i12 !== "0") {
+                  key.push(keys[_i12 - 1]);
                 }
-                _this5.liHtml(backData[_i4], key, keys[_i4]);
+                _this6.liHtml(backData[_i12], key, keys[_i12]);
               }
             }
           });
         }
       };
 
-      for (var _i2 = 1; _i2 < checkData.length; _i2++) {
-        _loop(_i2);
+      for (var _i10 = 1; _i10 < checkData.length; _i10++) {
+        _loop(_i10);
       }
     } else {
       var storeData = store.data;
       for (var x in checkData) {
-        for (var _i5 in storeData) {
-          if (storeData[_i5][param.prop.value] == checkData[x]) {
-            chooseLabel.push(storeData[_i5][param.prop.label]);
-            keys.push(_i5);
-            storeData = storeData[_i5][param.prop.children];
+        for (var _i13 in storeData) {
+          if (storeData[_i13][param.prop.value] == checkData[x]) {
+            chooseLabel.push(storeData[_i13][param.prop.label]);
+            keys.push(_i13);
+            storeData = storeData[_i13][param.prop.children];
             break;
           }
         }
@@ -537,31 +616,34 @@ layui.define(["jquery"], function (exports) {
     // 页面初始化
     load: function load(options) {
       var current = null;
-      for (var i in privates) {
-        if (privates[i].elem === options.elem) {
-          current = i;
+      for (var _i14 in privates) {
+        if (privates[_i14].elem === options.elem) {
+          current = _i14;
         }
       }
       if (!current) {
         current = dom_num;
         dom_num++;
+        privates[current] = new Array();
+        privates[current].obj = new Private();
       }
-      privates[current] = new Array();
       privates[current].elem = options.elem;
-      privates[current].obj = new Private();
       privates[current].obj.store.zIndex -= current;
       privates[current].obj.init(options);
     },
+
     // 获取页面中选中的数据，数组形式
     getChooseData: function getChooseData(elem) {
       var obj = this.elemCheck(elem);
       return obj.store.chooseData;
     },
+
     // 监听方法
     on: function on(type, elem, callback) {
       var obj = this.elemCheck(elem);
+      var className = obj.param.className;
       if (type == "click") {
-        obj.store.model.on('click', 'li', function () {
+        $(document).on('click', '.' + className + ' li', function () {
           setTimeout(function () {
             var data = obj.getThisData();
             if (obj.param.clicklast === false) {
@@ -579,14 +661,15 @@ layui.define(["jquery"], function (exports) {
         });
       }
     },
+
     // elem位置判断，禁止外界调用，因为你调也没啥卵用
     elemCheck: function elemCheck(elem) {
       if (!elem) {
         return privates[0].obj;
       }
-      for (var i in privates) {
-        if (privates[i].elem == elem) {
-          return privates[i].obj;
+      for (var _i15 in privates) {
+        if (privates[_i15].elem == elem) {
+          return privates[_i15].obj;
         }
       }
     }

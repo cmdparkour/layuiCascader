@@ -5,6 +5,12 @@ html #layuicss-ajaxCascader{
 .cascader-all{
     position: relative;
 }
+.cascader-model-phone{
+    position: fixed !important;
+    max-width: 92%;
+    left: 4% !important;
+    overflow-x: auto;
+}
 /* 禁用状态 */
 .cascader-disabled{
     
@@ -43,6 +49,13 @@ html #layuicss-ajaxCascader{
 }
 .cascader-ul i{
     padding-left: 15px;
+}
+.cascader-ul .layui-input{
+    margin: 4px 18px;
+    width: calc(100% - 39px);
+}
+.cascader-ul .layui-input::placeholder{
+    color: #c0cfe3;
 }
 .cascader-model{
 	position: absolute;

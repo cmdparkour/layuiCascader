@@ -25,7 +25,12 @@
  			},
  			clicklast: false,
  			time: 250,
- 			placeholder: "请选择"
+ 			placeholder: "请选择",
+ 			search: {
+ 				show: false,
+ 				minLabel: 5,
+ 				placeholder: '请输入搜索词'
+ 			}
  		},
  		// 定义全局状态仓库
  		this.store = {
@@ -43,7 +48,6 @@
 	 		zIndex: 2000						// 显示顺序
 	 	}
  	}
-
  	// 页面初始化
  	Private.prototype.init = function(options){
  		let store = this.store
@@ -55,7 +59,7 @@
  		// 开始存储
  		for (let i in options) {
  			if (options[i].length !== 0) {
- 				if (i == "prop") {
+ 				if (i == "prop" | i == 'search') {
  					for (let x in options[i]) {
  						param[i][x] = options[i][x]
  					}
@@ -68,17 +72,22 @@
  		if (options.data) {
  			store.data = options.data
  		}
+ 		param.device = this.checkDevice()
  		// 存储结束
-
  		if (store.cascaderDom.next().hasClass('cascader-all')) {
  			store.cascaderDom.next().remove()
  		}
+ 		param.className = 'cascader-' + this.param.elem.replace('#', '')
+ 		let phoneName = ''
+ 		if (param.device === 1) {
+ 			phoneName = 'cascader-model-phone'
+ 		}
  		// 渲染主dom
  		store.cascaderDom.after(`
-			<div class="cascader-all" style="width:`+this.param.width+`px;">
+			<div class="cascader-all ` + param.className + `" style="width:`+this.param.width+`px;">
 				<input type="text" class="layui-input cascader-input" placeholder="`+param.placeholder+`" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
 				<i class="layui-icon layui-icon-down cascader-i" style="top:`+this.param.height/2+`px;"></i>
-				<div class="cascader-model" style="z-index:`+this.store.zIndex+`;display:flex;">
+				<div class="cascader-model ` + phoneName + `" style="z-index:`+this.store.zIndex+`;display:flex;">
 				</div>
 			</div>
  		`)
@@ -123,6 +132,9 @@
 				this.liClick()
 				this.liHover()
 				this.modelHandle()
+				if (param.search) {
+					this.handleSearch()
+				}
  			})
  	}
 
@@ -147,10 +159,12 @@
  		let param = this.param
  		let store = this.store
  		let position = []
+ 		let key1 = ''
  		if (!key || key.length == 0) {
  			key=""
  		} else {
  			key = key.join('-')
+ 			key1 = key
  			key = key+"-"
  		}
  		if (data !== "") {
@@ -169,6 +183,9 @@
  			}
  		}
  		lis = lis.join('')
+ 		if (param.search && data.length > param.search.minLabel) {
+ 			lis = '<input class="layui-input cascader-model-input" key="'+ key1 + '" placeholder="'+ param.search.placeholder +'">' + lis
+ 		}
  		let ul = $(`
 			<ul class="cascader-ul">`+lis+`</ul>
 		`)
@@ -181,6 +198,51 @@
  	// 当前选中的跳转位置
  	Private.prototype.liPosition = function(position) {
  		let model = this.store.model.find('ul').last()
+ 	}
+
+ 	Private.prototype.handleSearch = function() {
+ 		let model = this.store.model
+ 		let prop = this.param.prop
+ 		let _this = this
+ 		let value = ''
+ 		let flag = true
+ 		model.on('compositionstart',function(){
+            flag = false
+        })
+        model.on('compositionend',function(){
+            flag = true
+        })
+ 		model.on('input', 'input', function() {
+ 			setTimeout(()=>{
+	 			if (flag) {
+	 				let data = _this.store.data
+		 			if (value == this.value) {
+		 				return
+		 			}
+		 			value = this.value
+		 			let key = $(this).attr('key').split('-')
+		 			let key1 = $(this).attr('key') + '-'
+		 			for (i in key) {
+		 				data = data[key[i]][prop.children]
+		 			}
+		 			let renderData = []
+		 			let lis = ''
+					for (i in data) {
+						if (data[i][prop.label].indexOf(value) > -1) {
+							if (data[i][prop.children] | data[i].hasChild) {
+								lis += '<li value="'+data[i][prop.value]+'" key="'+key1+i+'">'+data[i][prop.label]+'<i class="layui-icon layui-icon-right"></i></li>'
+							} else {
+								lis += '<li value="'+data[i][prop.value]+'" key="'+key1+i+'">'+data[i][prop.label]+'</li>'
+							}
+							 
+							renderData.push(data[i])
+						}
+					}
+					$(this.parentNode).find('li').remove()
+					$(this.parentNode).append(lis)
+	 			}
+	 		}, 0)
+ 		})
  	}
 
  	Private.prototype.modelHandle = function() {
@@ -308,12 +370,17 @@
  		let _this = this
  		let store = this.store
  		let param = this.param
+ 		let className = param.className
  		// store.model为一个自定义dom对象
  		if (param.clicklast == false) {
  			store.model.on('click', 'li', function() {
 	 			_this.getChooseData()
 	 			store.showCascader = !store.showCascader
-	 			store.model.slideUp(_this.param.time)
+	 			if (param.device === 1){
+	 				
+	 			} else {
+	 				store.model.slideUp(_this.param.time)
+	 			}
 	 			store.inputI.removeClass('rotate')
 	 		})
  		} else {
@@ -322,13 +389,27 @@
  				if (store.parentNextAll.length == 0) {
  					_this.getChooseData()
 		 			store.showCascader = !store.showCascader
-		 			store.model.slideUp(_this.param.time)
+		 			if (param.device === 1){
+	 				
+		 			} else {
+		 				store.model.slideUp(_this.param.time)
+		 			}
 		 			store.inputI.removeClass('rotate')
 		 			_this.getThisData()
  				}	 			
 	 		})
  		}
  		
+ 	}
+
+ 	// 判断当前访问客户端是PC还是移动端
+ 	// PC端返回1，移动端返回0
+ 	Private.prototype.checkDevice = function() {
+ 		if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+ 			return 1
+ 		} else {
+ 			return 0
+ 		}
  	}
 
  	// 获取当前层级数据
@@ -364,7 +445,7 @@
  		$(document).click(function(e) {
  			let className = e.target.className
  			className = className.split(" ")
- 			let other = ['cascader-input','cascader-model',"cascader-choose-active","layui-icon-right","cascader-ul"]
+ 			let other = ['cascader-input', 'cascader-model', "cascader-choose-active", "layui-icon-right", "cascader-ul", "cascader-model-input"]
  			for (let i in className) {
  				for (let x in other) {
 					if (className[i] == other[x]) {
@@ -534,32 +615,37 @@
 
  		// 页面初始化
  		load: function load(options) {
-			let current = null;
+			let current = null
 			for (let i in privates) {
 				if(privates[i].elem === options.elem){
-					current = i;
+					current = i
 				}
 			}
-			if(!current){
+			if (!current) {
 				current = dom_num
 				dom_num ++
+				privates[current] = new Array()
+				privates[current].obj = new Private()
+
 			}
-			privates[current] = new Array();
-			privates[current].elem = options.elem;
-			privates[current].obj = new Private();
-			privates[current].obj.store.zIndex -= current;
-			privates[current].obj.init(options);
+			privates[current].elem = options.elem
+			privates[current].obj.store.zIndex -= current
+			privates[current].obj.init(options)
+
     	},
+
  		// 获取页面中选中的数据，数组形式
- 		getChooseData:function(elem){
+ 		getChooseData: function(elem){
  			let obj = this.elemCheck(elem);
  			return obj.store.chooseData;
  		},
+
  		// 监听方法
  		on: function(type,elem,callback){
- 			let obj = this.elemCheck(elem);
+ 			let obj = this.elemCheck(elem)
+ 			let className = obj.param.className
  			if(type == "click"){
- 				obj.store.model.on('click','li',function(){
+ 				$(document).on('click','.' + className + ' li',function(){
  					setTimeout(function(){
  						let data = obj.getThisData()
 	 					if(obj.param.clicklast === false){
@@ -577,6 +663,7 @@
  				});
  			}
  		},
+
  		// elem位置判断，禁止外界调用，因为你调也没啥卵用
  		elemCheck:function(elem){
  			if(!elem){
