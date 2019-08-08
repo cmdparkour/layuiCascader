@@ -28,7 +28,7 @@
  			placeholder: "请选择",
  			search: {
  				show: false,
- 				minLabel: 5,
+ 				minLabel: 10,
  				placeholder: '请输入搜索词'
  			}
  		},
