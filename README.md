@@ -48,19 +48,19 @@ let options={
     elem:'#demo'                              //【必填】dom对应的id值或class值，最好为id
     ,width:100                                //【可选】input框宽度  【默认：220】  
     ,height:50                                //【可选】input框高度  【默认：40】
-    ,placeholder:"请选择您的最佳伴侣"	      //【可选】input框placeholder值 【默认：请选择】
+    ,placeholder:"请选择您的最佳伴侣"	       //【可选】input框placeholder值 【默认：请选择】
     ,prop:{
          value:'value',                       //【可选】定义接口需要取得的值的名称字段【默认:value】
          label:'label',                       //【可选】定义接口显示的名称字段  【默认：label】
          children:'children'                  //【可选】定义接口子集的名称字段 【默认：children】
     }
-    ,search: {							    // 【1.5新增】
+    ,search: {				      // 【1.5新增】
         show: true,                           // 【可选】是否显示search功能【默认：false】
         minLabel: 5,                          // 【可选】元素超过多少个时显示搜索框【默认：10】
         placeholder: "请输入关键词"            // 【可选】搜索框的提示信息【默认：请输入关键词】
     }
     ,showlast:false                           //【可选】是否只显示最后一级 【默认：false】
-    ,clicklast:false			             //【可选】点击最后一级才选择数据
+    ,clicklast:false			      //【可选】点击最后一级才选择数据
     ,disabled:false                           //【可选】是否禁用当前组件
     ,data:[]                                  //【二选一】初始化的值
     ,value:0                                  //【二选一】ajax请求初始值,即获取根结点的初始请求参数
