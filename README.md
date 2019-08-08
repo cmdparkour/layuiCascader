@@ -10,6 +10,7 @@
 修改时间：2019/05/27 ----- 2019/05/28	----- 2019/05/29 ----- 2019/05/30
 
 使用说明: 在主文件里面使用layui.config设置，具体方法看index.html
+自行开发说明 ：请把ajaxCascader.js名称改为ajaxCascader.es5.js或者其他名称，把ajaxCascader.src.js名称改为ajaxCascader.js文件，如有更好方法多多联系
 
 ## 使用说明
 
