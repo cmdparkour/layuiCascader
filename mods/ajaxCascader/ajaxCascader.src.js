@@ -132,7 +132,7 @@
 				this.liClick()
 				this.liHover()
 				this.modelHandle()
-				if (param.search) {
+				if (param.search.show) {
 					this.handleSearch()
 				}
  			})
@@ -183,7 +183,7 @@
  			}
  		}
  		lis = lis.join('')
- 		if (param.search && data.length > param.search.minLabel) {
+ 		if (param.search.show && data.length > param.search.minLabel) {
  			lis = '<input class="layui-input cascader-model-input" key="'+ key1 + '" placeholder="'+ param.search.placeholder +'">' + lis
  		}
  		let ul = $(`
@@ -222,9 +222,13 @@
 		 			value = this.value
 		 			let key = $(this).attr('key').split('-')
 		 			let key1 = $(this).attr('key') + '-'
-		 			for (i in key) {
-		 				data = data[key[i]][prop.children]
-		 			}
+		 			if ($(this).attr('key')) {
+						for (i in key) {
+							if (data[key[i]][prop.children]){
+								data = data[key[i]][prop.children]
+							}
+						}
+					}
 		 			let renderData = []
 		 			let lis = ''
 					for (i in data) {
