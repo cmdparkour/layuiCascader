@@ -50,6 +50,12 @@ html #layuicss-ajaxCascader{
 .cascader-ul i{
     padding-left: 15px;
 }
+.cascader-ul p{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
 .cascader-ul .layui-input{
     margin: 4px 18px;
     width: calc(100% - 39px);

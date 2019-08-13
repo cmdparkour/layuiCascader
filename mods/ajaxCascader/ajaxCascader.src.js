@@ -106,6 +106,7 @@
  		store.li = store.model.find('li')
  		// 全局状态初始化
  		store.model.hide()
+
  		if (store.data.length == 0) {
  			param.getChildren(param.value, data => {
  				store.data = data
@@ -183,8 +184,13 @@
  			}
  		}
  		lis = lis.join('')
- 		if (param.search.show && data.length > param.search.minLabel) {
- 			lis = '<input class="layui-input cascader-model-input" key="'+ key1 + '" placeholder="'+ param.search.placeholder +'">' + lis
+ 		if (data && data.length>0){
+	 		if (param.search.show && data.length > param.search.minLabel) {
+	 			lis = '<input class="layui-input cascader-model-input" key="'+ key1 + '" placeholder="'+ param.search.placeholder +'">' + lis
+	 		}
+ 		} else {
+ 			lis = '<p class="nodata">暂无数据</p>'
+ 			console.log('数据为空，无法进行渲染')
  		}
  		let ul = $(`
 			<ul class="cascader-ul">`+lis+`</ul>
@@ -466,22 +472,22 @@
  			store.showCascader = !store.showCascader
  			if (store.showCascader == true) {
  				store.inputI.addClass('rotate')				
-	 				let chooseData = _this.store.chooseData
-	 				if (chooseData.length != 0) {
-						let data = _this.store.data
-		 				let key = []
-		 				_this.clearModel()
-		 				for (let i in chooseData) {
-		 					for (let x in data) {
-		 						if (data[x][param.prop.value] == chooseData[i]) {
-		 							_this.liHtml(data,key,x)
-		 							key.unshift(x)
-		 							data = data[x][param.prop.children]
-		 							break
-		 						}
-		 					}
-		 				}
-	 				}		
+ 				let chooseData = _this.store.chooseData
+ 				let data = _this.store.data 				
+ 				if (chooseData.length !== 0) {
+	 				let key = []
+	 				_this.clearModel()
+	 				for (let i in chooseData) {
+	 					for (let x in data) {
+	 						if (data[x][param.prop.value] == chooseData[i]) {
+	 							_this.liHtml(data,key,x)
+	 							key.unshift(x)
+	 							data = data[x][param.prop.children]
+	 							break
+	 						}
+	 					}
+	 				}
+ 				}
  				store.model.slideDown(_this.param.time)
  				_this.ModelPosition()		
  			} else {
@@ -634,6 +640,12 @@
 			}
 			privates[current].elem = options.elem
 			privates[current].obj.store.zIndex -= current
+			privates[current].obj.store.data = []
+			if (options.chooseData) {
+				privates[current].obj.store.chooseData = options.chooseData
+			} else {
+				privates[current].obj.store.chooseData = []
+			}
 			privates[current].obj.init(options)
 
     	},

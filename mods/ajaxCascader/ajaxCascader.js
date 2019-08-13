@@ -103,6 +103,7 @@ layui.define(["jquery"], function (exports) {
     store.li = store.model.find('li');
     // 全局状态初始化
     store.model.hide();
+
     if (store.data.length == 0) {
       param.getChildren(param.value, function (data) {
         store.data = data;
@@ -128,7 +129,7 @@ layui.define(["jquery"], function (exports) {
       _this2.liClick();
       _this2.liHover();
       _this2.modelHandle();
-      if (param.search) {
+      if (param.search.show) {
         _this2.handleSearch();
       }
     });
@@ -179,8 +180,13 @@ layui.define(["jquery"], function (exports) {
       }
     }
     lis = lis.join('');
-    if (param.search && data.length > param.search.minLabel) {
-      lis = '<input class="layui-input cascader-model-input" key="' + key1 + '" placeholder="' + param.search.placeholder + '">' + lis;
+    if (data && data.length > 0) {
+      if (param.search.show && data.length > param.search.minLabel) {
+        lis = '<input class="layui-input cascader-model-input" key="' + key1 + '" placeholder="' + param.search.placeholder + '">' + lis;
+      }
+    } else {
+      lis = '<p class="nodata">暂无数据</p>';
+      console.log('数据为空，无法进行渲染');
     }
     var ul = $("\n\t\t\t<ul class=\"cascader-ul\">" + lis + "</ul>\n\t\t");
     ul.fadeIn('fast');
@@ -218,8 +224,12 @@ layui.define(["jquery"], function (exports) {
           value = _this3.value;
           var key = $(_this3).attr('key').split('-');
           var key1 = $(_this3).attr('key') + '-';
-          for (i in key) {
-            data = data[key[i]][prop.children];
+          if ($(_this3).attr('key')) {
+            for (i in key) {
+              if (data[key[i]][prop.children]) {
+                data = data[key[i]][prop.children];
+              }
+            }
           }
           var renderData = [];
           var lis = '';
@@ -460,8 +470,8 @@ layui.define(["jquery"], function (exports) {
       if (store.showCascader == true) {
         store.inputI.addClass('rotate');
         var chooseData = _this.store.chooseData;
-        if (chooseData.length != 0) {
-          var data = _this.store.data;
+        var data = _this.store.data;
+        if (chooseData.length !== 0) {
           var key = [];
           _this.clearModel();
           for (var _i7 in chooseData) {
@@ -629,6 +639,12 @@ layui.define(["jquery"], function (exports) {
       }
       privates[current].elem = options.elem;
       privates[current].obj.store.zIndex -= current;
+      privates[current].obj.store.data = [];
+      if (options.chooseData) {
+        privates[current].obj.store.chooseData = options.chooseData;
+      } else {
+        privates[current].obj.store.chooseData = [];
+      }
       privates[current].obj.init(options);
     },
 
