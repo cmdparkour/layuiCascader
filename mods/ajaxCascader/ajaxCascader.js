@@ -171,7 +171,9 @@ layui.define(["jquery"], function (exports) {
           li = li + ' class="cascader-choose-active"';
           position = [_i2, data.length];
         }
-        if (data[_i2].hasChild == true || data[_i2].children) {
+        // 来自于陈诗樵的BUG修复,github地址:https://github.com/alasq
+        // data[i].children 改为 data[i][param.prop.children]
+        if (data[_i2].hasChild == true || data[_i2][param.prop.children]) {
           li = li + '>' + data[_i2][param.prop.label] + '<i class="layui-icon layui-icon-right"></i></li>';
         } else {
           li = li + '>' + data[_i2][param.prop.label] + '</li>';

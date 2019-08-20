@@ -175,7 +175,9 @@
  					li = li +' class="cascader-choose-active"'
  					position = [i,data.length]
  				}
- 				if (data[i].hasChild == true || data[i].children) {
+ 				// 来自于陈诗樵的BUG修复,github地址:https://github.com/alasq
+ 				// data[i].children 改为 data[i][param.prop.children]
+ 				if (data[i].hasChild == true || data[i][param.prop.children]) {
  					li = li+'>'+data[i][param.prop.label]+'<i class="layui-icon layui-icon-right"></i></li>'
  				} else {
  					li = li+'>'+data[i][param.prop.label]+'</li>'
