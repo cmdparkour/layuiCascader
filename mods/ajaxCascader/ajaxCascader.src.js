@@ -5,11 +5,6 @@
  * 使用说明: 在主文件里面使用layui.config设置，具体方法看index.html
  */
 
- /**
- * 参数说明：
- * 			width（可选） :input框宽度
- *			height（可选）：input框高度
- */
  layui.define(["jquery"],(exports)=>{
  	let $ = layui.jquery;
  	// 私有方法，禁止外面调用的方法
@@ -111,17 +106,17 @@
  			param.getChildren(param.value, data => {
  				store.data = data
  				this.liHtml(store.data)
- 				if (param.checkData) {
-		 			if (param.checkData.length > 0) {
-			 			this.dataToshow(param.checkData)
+ 				if (param.chooseData) {
+		 			if (param.chooseData.length > 0) {
+			 			this.dataToshow(param.chooseData)
 			 		}
 		 		}
  			})
  		} else {
  			this.liHtml(store.data)
- 			if (param.checkData) {
-	 			if (param.checkData.length > 0) {
-		 			this.dataToshow(param.checkData)
+ 			if (param.chooseData) {
+	 			if (param.chooseData.length > 0) {
+		 			this.dataToshow(param.chooseData)
 		 		}
 	 		}
  		}
@@ -192,7 +187,6 @@
 	 		}
  		} else {
  			lis = '<p class="nodata">暂无数据</p>'
- 			console.log('数据为空，无法进行渲染')
  		}
  		let ul = $(`
 			<ul class="cascader-ul">`+lis+`</ul>
@@ -204,10 +198,28 @@
  	}
 
  	// 当前选中的跳转位置
+ 	// position:['0', 10]，
+ 	// '0': 代表当前选中的位置，已使用
+ 	// '10': 代表当前data的长度,暂时未用到
  	Private.prototype.liPosition = function(position) {
+ 		let currentIndex = Number(position[0])
  		let model = this.store.model.find('ul').last()
+ 		// ul标签的高度
+ 		let ulHeight = model.height()
+ 		// li标签的高度= 自身高度 + margin + padding 高度
+ 		let liHeight = model.find('li').outerHeight()
+ 		let minScroll = ulHeight/liHeight
+ 		if (currentIndex > minScroll) {
+ 			// model.scrollTop = 0
+ 			// console.log(model.scrollTop())
+ 			// = currentIndex * liHeight
+ 			$(model).animate({
+  			scrollTop: currentIndex * liHeight
+  		}, 500)
+ 		}
  	}
 
+ 	// 监听搜索事件
  	Private.prototype.handleSearch = function() {
  		let model = this.store.model
  		let prop = this.param.prop
@@ -239,6 +251,9 @@
 					}
 		 			let renderData = []
 		 			let lis = ''
+		 			if (key1 == '-') {
+						key1 = ''
+					}
 					for (i in data) {
 						if (data[i][prop.label].indexOf(value) > -1) {
 							if (data[i][prop.children] | data[i].hasChild) {
@@ -284,6 +299,7 @@
  			model.css('left',0)
  		}
  	}
+ 	
  	// 鼠标hover监听事件[li标签]
  	Private.prototype.liHover = function(){
  		let store = this.store
@@ -449,6 +465,7 @@
  		}
  		return currentData
  	}
+
  	// 鼠标监听事件[input控件]
  	Private.prototype.inputClick = function(options) {
  		let store = this.store
@@ -517,6 +534,7 @@
  		this.store.chooseData = chooseData;
  		this.inputValueChange(chooseLabel);
  	}
+
  	Private.prototype.inputValueChange = function(label){
  		let store = this.store;
  		let param = this.param;
@@ -536,37 +554,38 @@
  			store.input.attr('title',"");
  		} 		
  	}
+
  	// 数据回显
- 	Private.prototype.dataToshow = function(checkData){
+ 	Private.prototype.dataToshow = function(choosedata){
  		let param = this.param;
  		let store = this.store;
  		let backData = [];			//后端数据集合
  		let chooseLabel=[];			//选中的项对应的label值
- 		let keys=[];				//checkData在数据源中的位置大全
+ 		let keys=[];				//choosedata在数据源中的位置大全
  		backData[0] = store.data;
  		let flag = 1;
  		if(param.getChildren){
- 			if (checkData.length === 1) {
+ 			if (choosedata.length === 1) {
  				for (let i in store.data) {
- 					if (store.data[i][param.prop.value] == checkData[0]) {
+ 					if (store.data[i][param.prop.value] == choosedata[0]) {
  						let label = store.data[i][param.prop.label].split(',')
  						this.inputValueChange(label)
  						return
  					}
  				}	
  			}
- 			for(let i=1; i<checkData.length; i++){
-	 			if(i < checkData.length){
-	 				param.getChildren(checkData[i-1],data=>{
+ 			for(let i=1; i<choosedata.length; i++){
+	 			if(i < choosedata.length){
+	 				param.getChildren(choosedata[i-1],data=>{
 		 				backData[i] = data;
 		 				flag++;
-		 				if(flag == checkData.length){
-		 					for(let i=checkData.length -1;i>=0;i--){
+		 				if(flag == choosedata.length){
+		 					for(let i=choosedata.length -1;i>=0;i--){
 					 			for(let x in backData[i]){
-					 				if(checkData[i] == backData[i][x][param.prop.value]){
+					 				if(choosedata[i] == backData[i][x][param.prop.value]){
 						 				keys.unshift(x);
 						 				chooseLabel.unshift(backData[i][x][param.prop.label])
-						 				if(i < checkData.length -1){
+						 				if(i < choosedata.length -1){
 						 					backData[i][x][param.prop.children] = backData[i+1];
 						 				}
 						 				
@@ -592,9 +611,9 @@
 	 		}		
  		}else{
  			let storeData = store.data;
- 			for(let x in checkData){
+ 			for(let x in choosedata){
  				for(let i in  storeData){
- 					if(storeData[i][param.prop.value] == checkData[x]){
+ 					if(storeData[i][param.prop.value] == choosedata[x]){
  						chooseLabel.push(storeData[i][param.prop.label]);
  						keys.push(i)
  						storeData = storeData[i][param.prop.children];
@@ -604,16 +623,18 @@
  			}
  			// input框数据回显
 	 		this.inputValueChange(chooseLabel);
-	 		this.store.chooseData = checkData;
+	 		this.store.chooseData = choosedata;
 
  		}
  		
  	}
+
  	// 清空ul标签
  	Private.prototype.clearModel = function(){
  		let store = this.store;
  		store.model.html('');
  	}
+
  	// 监听下拉菜单的位置
 	Private.prototype.handlePosition = function(){
 		// 当前屏幕大小

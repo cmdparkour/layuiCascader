@@ -7,11 +7,6 @@
  * 使用说明: 在主文件里面使用layui.config设置，具体方法看index.html
  */
 
-/**
-* 参数说明：
-*       width（可选） :input框宽度
-*     height（可选）：input框高度
-*/
 layui.define(["jquery"], function (exports) {
   var $ = layui.jquery;
   // 私有方法，禁止外面调用的方法
@@ -108,17 +103,17 @@ layui.define(["jquery"], function (exports) {
       param.getChildren(param.value, function (data) {
         store.data = data;
         _this2.liHtml(store.data);
-        if (param.checkData) {
-          if (param.checkData.length > 0) {
-            _this2.dataToshow(param.checkData);
+        if (param.chooseData) {
+          if (param.chooseData.length > 0) {
+            _this2.dataToshow(param.chooseData);
           }
         }
       });
     } else {
       this.liHtml(store.data);
-      if (param.checkData) {
-        if (param.checkData.length > 0) {
-          this.dataToshow(param.checkData);
+      if (param.chooseData) {
+        if (param.chooseData.length > 0) {
+          this.dataToshow(param.chooseData);
         }
       }
     }
@@ -188,7 +183,6 @@ layui.define(["jquery"], function (exports) {
       }
     } else {
       lis = '<p class="nodata">暂无数据</p>';
-      console.log('数据为空，无法进行渲染');
     }
     var ul = $("\n\t\t\t<ul class=\"cascader-ul\">" + lis + "</ul>\n\t\t");
     ul.fadeIn('fast');
@@ -198,10 +192,28 @@ layui.define(["jquery"], function (exports) {
   };
 
   // 当前选中的跳转位置
+  // position:['0', 10]，
+  // '0': 代表当前选中的位置，已使用
+  // '10': 代表当前data的长度,暂时未用到
   Private.prototype.liPosition = function (position) {
+    var currentIndex = Number(position[0]);
     var model = this.store.model.find('ul').last();
+    // ul标签的高度
+    var ulHeight = model.height();
+    // li标签的高度= 自身高度 + margin + padding 高度
+    var liHeight = model.find('li').outerHeight();
+    var minScroll = ulHeight / liHeight;
+    if (currentIndex > minScroll) {
+      // model.scrollTop = 0
+      // console.log(model.scrollTop())
+      // = currentIndex * liHeight
+      $(model).animate({
+        scrollTop: currentIndex * liHeight
+      }, 500);
+    }
   };
 
+  // 监听搜索事件
   Private.prototype.handleSearch = function () {
     var model = this.store.model;
     var prop = this.param.prop;
@@ -235,6 +247,9 @@ layui.define(["jquery"], function (exports) {
           }
           var renderData = [];
           var lis = '';
+          if (key1 == '-') {
+            key1 = '';
+          }
           for (i in data) {
             if (data[i][prop.label].indexOf(value) > -1) {
               if (data[i][prop.children] | data[i].hasChild) {
@@ -283,6 +298,7 @@ layui.define(["jquery"], function (exports) {
       model.css('left', 0);
     }
   };
+
   // 鼠标hover监听事件[li标签]
   Private.prototype.liHover = function () {
     var store = this.store;
@@ -447,6 +463,7 @@ layui.define(["jquery"], function (exports) {
     }
     return currentData;
   };
+
   // 鼠标监听事件[input控件]
   Private.prototype.inputClick = function (options) {
     var store = this.store;
@@ -513,6 +530,7 @@ layui.define(["jquery"], function (exports) {
     this.store.chooseData = chooseData;
     this.inputValueChange(chooseLabel);
   };
+
   Private.prototype.inputValueChange = function (label) {
     var store = this.store;
     var param = this.param;
@@ -532,21 +550,22 @@ layui.define(["jquery"], function (exports) {
       store.input.attr('title', "");
     }
   };
+
   // 数据回显
-  Private.prototype.dataToshow = function (checkData) {
+  Private.prototype.dataToshow = function (choosedata) {
     var _this6 = this;
 
     var param = this.param;
     var store = this.store;
     var backData = []; //后端数据集合
     var chooseLabel = []; //选中的项对应的label值
-    var keys = []; //checkData在数据源中的位置大全
+    var keys = []; //choosedata在数据源中的位置大全
     backData[0] = store.data;
     var flag = 1;
     if (param.getChildren) {
-      if (checkData.length === 1) {
+      if (choosedata.length === 1) {
         for (var _i9 in store.data) {
-          if (store.data[_i9][param.prop.value] == checkData[0]) {
+          if (store.data[_i9][param.prop.value] == choosedata[0]) {
             var label = store.data[_i9][param.prop.label].split(',');
             this.inputValueChange(label);
             return;
@@ -555,17 +574,17 @@ layui.define(["jquery"], function (exports) {
       }
 
       var _loop = function _loop(_i10) {
-        if (_i10 < checkData.length) {
-          param.getChildren(checkData[_i10 - 1], function (data) {
+        if (_i10 < choosedata.length) {
+          param.getChildren(choosedata[_i10 - 1], function (data) {
             backData[_i10] = data;
             flag++;
-            if (flag == checkData.length) {
-              for (var _i11 = checkData.length - 1; _i11 >= 0; _i11--) {
+            if (flag == choosedata.length) {
+              for (var _i11 = choosedata.length - 1; _i11 >= 0; _i11--) {
                 for (var x in backData[_i11]) {
-                  if (checkData[_i11] == backData[_i11][x][param.prop.value]) {
+                  if (choosedata[_i11] == backData[_i11][x][param.prop.value]) {
                     keys.unshift(x);
                     chooseLabel.unshift(backData[_i11][x][param.prop.label]);
-                    if (_i11 < checkData.length - 1) {
+                    if (_i11 < choosedata.length - 1) {
                       backData[_i11][x][param.prop.children] = backData[_i11 + 1];
                     }
                   }
@@ -589,14 +608,14 @@ layui.define(["jquery"], function (exports) {
         }
       };
 
-      for (var _i10 = 1; _i10 < checkData.length; _i10++) {
+      for (var _i10 = 1; _i10 < choosedata.length; _i10++) {
         _loop(_i10);
       }
     } else {
       var storeData = store.data;
-      for (var x in checkData) {
+      for (var x in choosedata) {
         for (var _i13 in storeData) {
-          if (storeData[_i13][param.prop.value] == checkData[x]) {
+          if (storeData[_i13][param.prop.value] == choosedata[x]) {
             chooseLabel.push(storeData[_i13][param.prop.label]);
             keys.push(_i13);
             storeData = storeData[_i13][param.prop.children];
@@ -606,14 +625,16 @@ layui.define(["jquery"], function (exports) {
       }
       // input框数据回显
       this.inputValueChange(chooseLabel);
-      this.store.chooseData = checkData;
+      this.store.chooseData = choosedata;
     }
   };
+
   // 清空ul标签
   Private.prototype.clearModel = function () {
     var store = this.store;
     store.model.html('');
   };
+
   // 监听下拉菜单的位置
   Private.prototype.handlePosition = function () {
     // 当前屏幕大小

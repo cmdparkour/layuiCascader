@@ -58,7 +58,7 @@ html #layuicss-ajaxCascader{
 }
 .cascader-ul .layui-input{
     margin: 4px 18px;
-    width: calc(100% - 39px);
+    width: auto;
 }
 .cascader-ul .layui-input::placeholder{
     color: #c0cfe3;
