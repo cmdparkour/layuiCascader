@@ -255,7 +255,6 @@
  	Private.prototype.clearButtonClick = function() {
  		let store = this.store
  		let clearButton = this.store.clearButton
- 		console.log(clearButton)
  		clearButton.click(()=>{
  			this.store.chooseData = []
  			this.inputValueChange([])
