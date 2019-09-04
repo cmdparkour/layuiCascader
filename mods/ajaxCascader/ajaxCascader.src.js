@@ -25,7 +25,8 @@
  				show: false,
  				minLabel: 10,
  				placeholder: '请输入搜索词'
- 			}
+ 			},
+ 			clear: false
  		},
  		// 定义全局状态仓库
  		this.store = {
@@ -77,11 +78,18 @@
  		if (param.device === 1) {
  			phoneName = 'cascader-model-phone'
  		}
+ 		let clearButtonDom = ''
+ 		let clearInput = ''
+ 		if (param.clear) {
+ 			clearInput = 'cascader-input-clear'
+ 			clearButtonDom = `<i class="layui-icon layui-icon-close cascader-clear" style="top:`+this.param.height/2+`px;"></i>`
+ 		}
  		// 渲染主dom
  		store.cascaderDom.after(`
-			<div class="cascader-all ` + param.className + `" style="width:`+this.param.width+`px;">
+			<div class="cascader-all ` + param.className + ` `+ clearInput +`" style="width:`+this.param.width+`px;">
 				<input type="text" class="layui-input cascader-input" placeholder="`+param.placeholder+`" readonly style="width:`+this.param.width+`px;height:`+this.param.height+`px;">
 				<i class="layui-icon layui-icon-down cascader-i" style="top:`+this.param.height/2+`px;"></i>
+				` + clearButtonDom + `
 				<div class="cascader-model ` + phoneName + `" style="z-index:`+this.store.zIndex+`;display:flex;">
 				</div>
 			</div>
@@ -99,6 +107,10 @@
 		store.cascaderAll = $(store.cascaderDom.nextAll()[0])
  		store.model = store.cascaderDom.nextAll().find('.cascader-model')
  		store.li = store.model.find('li')
+ 		if (param.clear) {
+ 			store.clearButton = store.cascaderAll.find('.cascader-clear')
+ 			this.clearButtonClick()
+ 		}
  		// 全局状态初始化
  		store.model.hide()
 
@@ -125,6 +137,7 @@
  		this.disabled()
  			.then(res => {
  				this.inputClick(options)
+ 				this.inputHover()
 				this.liClick()
 				this.liHover()
 				this.modelHandle()
@@ -218,7 +231,16 @@
   		}, 500)
  		}
  	}
-
+ 	// 监听清空按钮点击事件
+ 	Private.prototype.clearButtonClick = function() {
+ 		let store = this.store
+ 		let clearButton = this.store.clearButton
+ 		console.log(clearButton)
+ 		clearButton.click(()=>{
+ 			this.store.chooseData = []
+ 			this.inputValueChange([])
+ 		})
+ 	}
  	// 监听搜索事件
  	Private.prototype.handleSearch = function() {
  		let model = this.store.model
@@ -271,7 +293,7 @@
 	 		}, 0)
  		})
  	}
-
+ 	// 监听窗口变化事件
  	Private.prototype.modelHandle = function() {
  		$(window).resize(() => {          //当浏览器大小变化时
 		    let model = this.store.model
@@ -465,8 +487,26 @@
  		}
  		return currentData
  	}
+ 	// 鼠标监听事件【input控件hover】
+ 	Private.prototype.inputHover = function() {
+ 		let param = this.param
+ 		let store = this.store
 
- 	// 鼠标监听事件[input控件]
+ 		// 如果用户配置了清空
+ 		if (param.clear) {
+ 			// 监听input框hover事件
+ 			store.input.hover(function(){
+	 			if (store.chooseData.length === 0) {
+	 				store.cascaderAll.removeClass('cascader-input-clear')
+		 		} else {
+		 			store.cascaderAll.addClass('cascader-input-clear')
+		 		}
+	 		})
+ 		}
+
+ 		
+ 	}
+ 	// 鼠标监听事件[input控件click]
  	Private.prototype.inputClick = function(options) {
  		let store = this.store
  		let param = this.param
@@ -487,6 +527,7 @@
  			store.model.slideUp(_this.param.time)
 	 		store.inputI.removeClass('rotate')
  		});
+ 		// 监听 input 点击事件
  		store.input.click(function() {
  			store.showCascader = !store.showCascader
  			if (store.showCascader == true) {
@@ -506,6 +547,9 @@
 	 						}
 	 					}
 	 				}
+ 				} else {
+ 					_this.clearModel()
+ 					_this.liHtml(data)
  				}
  				store.model.slideDown(_this.param.time)
  				_this.ModelPosition()		

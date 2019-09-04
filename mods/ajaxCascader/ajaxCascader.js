@@ -27,7 +27,8 @@ layui.define(["jquery"], function (exports) {
         show: false,
         minLabel: 10,
         placeholder: '请输入搜索词'
-      }
+      },
+      clear: false
     },
     // 定义全局状态仓库
     this.store = {
@@ -81,8 +82,14 @@ layui.define(["jquery"], function (exports) {
     if (param.device === 1) {
       phoneName = 'cascader-model-phone';
     }
+    var clearButtonDom = '';
+    var clearInput = '';
+    if (param.clear) {
+      clearInput = 'cascader-input-clear';
+      clearButtonDom = "<i class=\"layui-icon layui-icon-close cascader-clear\" style=\"top:" + this.param.height / 2 + "px;\"></i>";
+    }
     // 渲染主dom
-    store.cascaderDom.after("\n\t\t\t<div class=\"cascader-all " + param.className + "\" style=\"width:" + this.param.width + "px;\">\n\t\t\t\t<input type=\"text\" class=\"layui-input cascader-input\" placeholder=\"" + param.placeholder + "\" readonly style=\"width:" + this.param.width + "px;height:" + this.param.height + "px;\">\n\t\t\t\t<i class=\"layui-icon layui-icon-down cascader-i\" style=\"top:" + this.param.height / 2 + "px;\"></i>\n\t\t\t\t<div class=\"cascader-model " + phoneName + "\" style=\"z-index:" + this.store.zIndex + ";display:flex;\">\n\t\t\t\t</div>\n\t\t\t</div>\n \t\t");
+    store.cascaderDom.after("\n\t\t\t<div class=\"cascader-all " + param.className + " " + clearInput + "\" style=\"width:" + this.param.width + "px;\">\n\t\t\t\t<input type=\"text\" class=\"layui-input cascader-input\" placeholder=\"" + param.placeholder + "\" readonly style=\"width:" + this.param.width + "px;height:" + this.param.height + "px;\">\n\t\t\t\t<i class=\"layui-icon layui-icon-down cascader-i\" style=\"top:" + this.param.height / 2 + "px;\"></i>\n\t\t\t\t" + clearButtonDom + "\n\t\t\t\t<div class=\"cascader-model " + phoneName + "\" style=\"z-index:" + this.store.zIndex + ";display:flex;\">\n\t\t\t\t</div>\n\t\t\t</div>\n \t\t");
 
     // 判断elem是否存在以及是否正确，elem必填
     if (!options.elem || options.elem == "") {
@@ -96,6 +103,10 @@ layui.define(["jquery"], function (exports) {
     store.cascaderAll = $(store.cascaderDom.nextAll()[0]);
     store.model = store.cascaderDom.nextAll().find('.cascader-model');
     store.li = store.model.find('li');
+    if (param.clear) {
+      store.clearButton = store.cascaderAll.find('.cascader-clear');
+      this.clearButtonClick();
+    }
     // 全局状态初始化
     store.model.hide();
 
@@ -121,6 +132,7 @@ layui.define(["jquery"], function (exports) {
     // 不禁用则执行下面的事件
     this.disabled().then(function (res) {
       _this2.inputClick(options);
+      _this2.inputHover();
       _this2.liClick();
       _this2.liHover();
       _this2.modelHandle();
@@ -212,7 +224,18 @@ layui.define(["jquery"], function (exports) {
       }, 500);
     }
   };
+  // 监听清空按钮点击事件
+  Private.prototype.clearButtonClick = function () {
+    var _this3 = this;
 
+    var store = this.store;
+    var clearButton = this.store.clearButton;
+    console.log(clearButton);
+    clearButton.click(function () {
+      _this3.store.chooseData = [];
+      _this3.inputValueChange([]);
+    });
+  };
   // 监听搜索事件
   Private.prototype.handleSearch = function () {
     var model = this.store.model;
@@ -227,18 +250,18 @@ layui.define(["jquery"], function (exports) {
       flag = true;
     });
     model.on('input', 'input', function () {
-      var _this3 = this;
+      var _this4 = this;
 
       setTimeout(function () {
         if (flag) {
           var data = _this.store.data;
-          if (value == _this3.value) {
+          if (value == _this4.value) {
             return;
           }
-          value = _this3.value;
-          var key = $(_this3).attr('key').split('-');
-          var key1 = $(_this3).attr('key') + '-';
-          if ($(_this3).attr('key')) {
+          value = _this4.value;
+          var key = $(_this4).attr('key').split('-');
+          var key1 = $(_this4).attr('key') + '-';
+          if ($(_this4).attr('key')) {
             for (i in key) {
               if (data[key[i]][prop.children]) {
                 data = data[key[i]][prop.children];
@@ -261,20 +284,20 @@ layui.define(["jquery"], function (exports) {
               renderData.push(data[i]);
             }
           }
-          $(_this3.parentNode).find('li').remove();
-          $(_this3.parentNode).append(lis);
+          $(_this4.parentNode).find('li').remove();
+          $(_this4.parentNode).append(lis);
         }
       }, 0);
     });
   };
-
+  // 监听窗口变化事件
   Private.prototype.modelHandle = function () {
-    var _this4 = this;
+    var _this5 = this;
 
     $(window).resize(function () {
       //当浏览器大小变化时
-      var model = _this4.store.model;
-      _this4.ModelPosition();
+      var model = _this5.store.model;
+      _this5.ModelPosition();
     });
   };
 
@@ -305,7 +328,7 @@ layui.define(["jquery"], function (exports) {
     var param = this.param;
     var _this = this;
     store.model.on('mouseenter', 'li', function () {
-      var _this5 = this;
+      var _this6 = this;
 
       store.parentNextAll = $(this).parent("ul").nextAll();
       store.brother = $(this).siblings();
@@ -340,8 +363,8 @@ layui.define(["jquery"], function (exports) {
             array.hasChild = false;
           };
 
-          var keys = $(_this5).attr('key');
-          var value = $(_this5).attr('value');
+          var keys = $(_this6).attr('key');
+          var value = $(_this6).attr('value');
           var data = _this.store.data;
           var childrenName = _this.param.prop.children;
           keys = keys.split('-');
@@ -372,11 +395,11 @@ layui.define(["jquery"], function (exports) {
                   }
                 }
                 DataTreeAdd(data, goodData, keys);
-                store.parentNextAll = $(_this5).parent("ul").nextAll();
+                store.parentNextAll = $(_this6).parent("ul").nextAll();
                 store.parentNextAll.remove();
                 _this.liHtml(goodData, keys);
               } else {
-                $(_this5).find('i').remove();
+                $(_this6).find('i').remove();
                 store.parentNextAll.remove();
                 DataTreeChange(data, keys);
               }
@@ -463,8 +486,24 @@ layui.define(["jquery"], function (exports) {
     }
     return currentData;
   };
+  // 鼠标监听事件【input控件hover】
+  Private.prototype.inputHover = function () {
+    var param = this.param;
+    var store = this.store;
 
-  // 鼠标监听事件[input控件]
+    // 如果用户配置了清空
+    if (param.clear) {
+      // 监听input框hover事件
+      store.input.hover(function () {
+        if (store.chooseData.length === 0) {
+          store.cascaderAll.removeClass('cascader-input-clear');
+        } else {
+          store.cascaderAll.addClass('cascader-input-clear');
+        }
+      });
+    }
+  };
+  // 鼠标监听事件[input控件click]
   Private.prototype.inputClick = function (options) {
     var store = this.store;
     var param = this.param;
@@ -484,6 +523,7 @@ layui.define(["jquery"], function (exports) {
       store.model.slideUp(_this.param.time);
       store.inputI.removeClass('rotate');
     });
+    // 监听 input 点击事件
     store.input.click(function () {
       store.showCascader = !store.showCascader;
       if (store.showCascader == true) {
@@ -503,6 +543,9 @@ layui.define(["jquery"], function (exports) {
               }
             }
           }
+        } else {
+          _this.clearModel();
+          _this.liHtml(data);
         }
         store.model.slideDown(_this.param.time);
         _this.ModelPosition();
@@ -553,7 +596,7 @@ layui.define(["jquery"], function (exports) {
 
   // 数据回显
   Private.prototype.dataToshow = function (choosedata) {
-    var _this6 = this;
+    var _this7 = this;
 
     var param = this.param;
     var store = this.store;
@@ -593,15 +636,15 @@ layui.define(["jquery"], function (exports) {
               store.data = backData[0];
 
               // input框数据回显
-              _this6.inputValueChange(chooseLabel);
-              _this6.clearModel();
+              _this7.inputValueChange(chooseLabel);
+              _this7.clearModel();
               // 选择器数据回显
               var key = [];
               for (var _i12 in backData) {
                 if (_i12 !== "0") {
                   key.push(keys[_i12 - 1]);
                 }
-                _this6.liHtml(backData[_i12], key, keys[_i12]);
+                _this7.liHtml(backData[_i12], key, keys[_i12]);
               }
             }
           });

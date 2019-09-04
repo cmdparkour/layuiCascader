@@ -154,3 +154,17 @@ html #layuicss-ajaxCascader{
     transform-origin:center center;
     transform: rotate(180deg);
 }
+.cascader-input-clear:hover .cascader-clear{
+    display: block;
+}
+.cascader-input-clear:hover .cascader-i{
+    display: none;
+}
+.cascader-clear{
+    position: absolute;
+    right: 15px;
+    margin-top: -7px;
+    font-size: 18px;
+    cursor: pointer;
+    display: none;
+}
