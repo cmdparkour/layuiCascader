@@ -109,11 +109,11 @@ cascader.getChooseData()
 
 ```
 // 选择器点击事件的监听
-cascader.on('click',function(){
+cascader.on('click', '#demo1', function(){
 	
 });
 // 选择器hover事件的监听
-cascader.on('hover',function(){
+cascader.on('hover', '#demo1', function(){
 	
 });
 ```
